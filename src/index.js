@@ -21,12 +21,14 @@ if (stage) {
       detail: stage.__SCROLLYTELLER__
     });
   });
+  // Unbind all arrive events
+  Arrive.unbindAllArrive();
 }
 
+
 function init(ev) {
-  console.log(ev);
-  // console.log(ev.target); // the stage element
-  // console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
+  console.log(ev.target); // the stage element
+  console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
 
   const App = require('./components/App');
   render(<App />, stage, stage.firstChild);
@@ -36,7 +38,10 @@ function init(ev) {
 if (module.hot) {
   module.hot.accept('./components/App', () => {
     try {
-      init();
+      init({
+        target: stage,
+        detail: stage.__SCROLLYTELLER__
+      });
     } catch (err) {
       const ErrorBox = require('./components/ErrorBox');
 

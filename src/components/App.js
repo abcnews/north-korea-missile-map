@@ -4,8 +4,8 @@ const worm = require('./worm.svg');
 
 document.addEventListener('mark', mark);
 
-function mark () {
-  console.log('MARK!');
+function mark (event) {
+  console.log(event);
 }
 
 class App extends Component {
