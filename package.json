@@ -1,0 +1,21 @@
+{
+  "name": "north-korea-missile-map",
+  "version": "1.0.0",
+  "description": "A project generated from aunty's preact-app template.",
+  "license": "MIT",
+  "private": true,
+  "contributors": [
+    "Joshua Byrd <phocks@gmail.com>"
+  ],
+  "aunty": "preact-app",
+  "scripts": {
+    "start": "aunty serve"
+  },
+  "devDependencies": {
+    "@abcnews/aunty": "5.1.x"
+  },
+  "dependencies": {
+    "preact": "^8.2.5",
+    "preact-compat": "^3.17.0"
+  }
+}
