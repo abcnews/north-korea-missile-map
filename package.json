@@ -15,6 +15,7 @@
     "@abcnews/aunty": "5.1.x"
   },
   "dependencies": {
+    "arrive": "^2.4.1",
     "preact": "^8.2.5",
     "preact-compat": "^3.17.0"
   }

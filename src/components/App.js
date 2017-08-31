@@ -2,6 +2,12 @@ const {h, Component} = require('preact');
 const styles = require('./App.scss');
 const worm = require('./worm.svg');
 
+document.addEventListener('mark', mark);
+
+function mark () {
+  console.log('MARK!');
+}
+
 class App extends Component {
   render() {
     return (

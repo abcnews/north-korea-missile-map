@@ -1,14 +1,37 @@
 const {h, render} = require('preact');
+const Arrive = require('arrive');
 
-const root = document.querySelector('[data-north-korea-missile-map-root]');
+let stage = document.querySelector('.scrollyteller-stage');
 
-function init() {
-  const App = require('./components/App');
+if (stage) {
+  init({
+    target: stage,
+    detail: stage.__SCROLLYTELLER__
+  });
+} else {
+  console.log('waiting for the stage');
+  // document.addEventListener('mark', init); // do better
 
-  render(<App />, root, root.firstChild);
+  document.arrive(".scrollyteller-stage", function() {
+    console.log('Stage has arrived...');
+    stage = document.querySelector('.scrollyteller-stage');
+    console.log('Initialising interactive...');
+    init({
+      target: stage,
+      detail: stage.__SCROLLYTELLER__
+    });
+  });
 }
 
-init();
+function init(ev) {
+  console.log(ev);
+  // console.log(ev.target); // the stage element
+  // console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
+
+  const App = require('./components/App');
+  render(<App />, stage, stage.firstChild);
+}
+
 
 if (module.hot) {
   module.hot.accept('./components/App', () => {
@@ -17,7 +40,7 @@ if (module.hot) {
     } catch (err) {
       const ErrorBox = require('./components/ErrorBox');
 
-      render(<ErrorBox error={err} />, root, root.firstChild);
+      render(<ErrorBox error={err} />, stage, stage.firstChild);
     }
   });
 }

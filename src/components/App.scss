@@ -27,3 +27,15 @@
   width: 240px;
   height: auto;
 }
+
+
+// A few global overrides to make things look nice
+:global {
+  .Block.is-richtext,
+  .scrollyteller-stage {
+    background: #f9f9f9;
+  }
+  .embed-fragment {
+    margin-bottom: 0;
+  }
+}
