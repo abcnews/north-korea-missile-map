@@ -21,7 +21,6 @@ let rotation = 0;
 var projection = geo.geoOrthographic()
   .scale(170)
   .translate([width / 2, height / 2])
-  // .clipAngle(90)
   .precision(.1);
 
 // Set up our color scale
