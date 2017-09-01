@@ -16,7 +16,16 @@
   },
   "dependencies": {
     "arrive": "^2.4.1",
+    "d3": "^4.10.0",
+    "d3-geo": "^1.6.4",
+    "d3-geo-projection": "^2.2.0",
+    "d3-request": "^1.0.5",
+    "d3-scale": "^1.0.6",
+    "d3-selection": "^1.1.0",
+    "d3-shape": "^1.2.0",
+    "d3-timer": "^1.0.6",
     "preact": "^8.2.5",
-    "preact-compat": "^3.17.0"
+    "preact-compat": "^3.17.0",
+    "topojson": "^3.0.0"
   }
 }

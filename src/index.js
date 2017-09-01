@@ -10,7 +10,7 @@ if (stage) {
   });
 } else {
   console.log('waiting for the stage');
-  // document.addEventListener('mark', init); // do better
+  // document.addEventListener('mark', init);
 
   document.arrive(".scrollyteller-stage", function() {
     console.log('Stage has arrived...');
@@ -21,7 +21,7 @@ if (stage) {
       detail: stage.__SCROLLYTELLER__
     });
   });
-  // Unbind all arrive events
+  // Unbind all arrive listeners
   Arrive.unbindAllArrive();
 }
 
@@ -38,6 +38,7 @@ function init(ev) {
 if (module.hot) {
   module.hot.accept('./components/App', () => {
     try {
+      // document.removeEventListener('mark', mark);
       init({
         target: stage,
         detail: stage.__SCROLLYTELLER__

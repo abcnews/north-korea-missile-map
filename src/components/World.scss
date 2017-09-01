@@ -1,0 +1,43 @@
+.wrapper {
+  text-align: center;
+  margin-bottom: 0;
+}
+
+.responsive-container {
+  max-width: 700px;
+  margin: auto;
+}
+
+.scaling-svg-container {
+  position: relative;
+  height: 0;
+  width: 100%;
+  padding: 0;
+  padding-bottom: 100%;
+  /* override this inline for aspect ratio other than square */
+}
+.scaling-svg {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  top: 0;
+}
+
+.fill {
+  fill: #E1F5FA;
+}
+
+.stroke {
+  // fill: none;
+  stroke: #5C6C70;
+  stroke-width: 0.5px;
+}
+
+.label {
+  font-size: 18px;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.7), -1px -1px 0px rgba(255,255,255,0.7), -1px 1px 0px rgba(255,255,255,0.7), 1px -1px 0px rgba(255,255,255,0.7);
+  @media screen and (min-width: 700px) {
+    font-size: 12px;
+  }
+}

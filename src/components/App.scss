@@ -7,6 +7,12 @@
   height: 100%;
   min-height: 320px;
   background-color: #ffc100;
+  // background-color: #111;
+  // background: url(https://i.ytimg.com/vi/vFPWVCbDqTc/maxresdefault.jpg) no-repeat center center scroll;
+  // -webkit-background-size: cover;
+  // -moz-background-size: cover;
+  // -o-background-size: cover;
+  // background-size: cover;
   color: #fff;
   text-align: center;
 
@@ -31,6 +37,9 @@
 
 // A few global overrides to make things look nice
 :global {
+  .Block-content:last-child {
+    margin-bottom: 100vh !important; 
+  }
   .Block.is-richtext,
   .scrollyteller-stage {
     background: #f9f9f9;
