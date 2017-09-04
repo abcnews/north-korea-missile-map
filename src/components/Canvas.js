@@ -7,7 +7,7 @@ const styles = require('./Canvas.scss');
 var width = 750,
     height = 700;
 
-var velocity = .02;
+var velocity = .2;
 
 
 
@@ -20,7 +20,8 @@ class Canvas extends Component {
     var projection = d3.geoOrthographic()
       .scale(170)
       .translate([width / 2, height / 2])
-      .precision(.1);
+      .precision(.1)
+      .fitSize([width, height], topojson.mesh(world));
 
     var base = d3.select('#canvas #map');
     var chart = base.append('canvas')
@@ -32,29 +33,49 @@ class Canvas extends Component {
     var context = chart.node().getContext("2d");
 
 
+
     var path = d3.geoPath()
       .projection(projection)
       .context(context);
 
     context.beginPath();
 
-    var mesh = path(topojson.mesh(world));
+    var mesh = path(topojson.mesh(world));    
 
     // context.fillStyle = 'green';
     // context.fill();
     context.strokeStyle = "green";
     context.stroke();
 
-    d3.timer(function(elapsed) {
-      context.clearRect(0, 0, width, height);
-  
-      projection.rotate([velocity * elapsed, 0]);
-      context.beginPath();
-      path(topojson.mesh(world));
-      context.strokeStyle = "green";
-      context.stroke();
+    // d3.timer(function(elapsed) {
+      
+    let rotation = 0.0;
 
-    });
+      // document.addEventListener('mark', mark);
+
+      var fps = 25
+      function animate() {
+        mark();
+        setTimeout(function() {
+          requestAnimationFrame(animate);
+        }, 1000 / fps);
+      }
+      animate();
+      // setInterval(mark, 100);
+      
+      function mark (event) {
+        
+        context.clearRect(0, 0, width, height);
+
+        projection.rotate([rotation, 0]);
+        rotation += velocity;
+        context.beginPath();
+        path(topojson.mesh(world));
+        context.strokeStyle = "green";
+        context.stroke();
+      }
+
+    // });
 
     // // Create an in memory only element of type 'custom'
     // var detachedContainer = document.createElement("custom");
