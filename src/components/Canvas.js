@@ -7,8 +7,6 @@ const styles = require('./Canvas.scss');
 var width = 700,
     height = 700;
 
-var velocity = .1;
-
 
 class Canvas extends Component {
   componentDidMount() {
@@ -16,10 +14,10 @@ class Canvas extends Component {
 
     // Set up a D3 projection here 
     var projection = d3.geoOrthographic()
-      .scale(170)
       .translate([width / 2, height / 2])
       .clipAngle(90)
-      .precision(.1)
+      .precision(0.1)
+      .rotate([-125.762524, -39.039219]) // Starting point
       .fitSize([width, height], topojson.mesh(world));
 
     var base = d3.select('#canvas #map');
@@ -28,49 +26,48 @@ class Canvas extends Component {
       .attr('width', width)
       .attr('height', height);
 
-    // console.log(canvas);
-
     var context = chart.node().getContext("2d");
 
     var path = d3.geoPath()
       .projection(projection)
       .context(context);
 
-    context.beginPath();
+    const land = topojson.feature(world, world.objects.land),
+          borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; });
 
-    var mesh = path(topojson.mesh(world));    
+    // Draw the initial Globe
 
-    // context.fillStyle = 'green';
-    // context.fill();
-    context.strokeStyle = "green";
-    context.stroke();
+    context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
+    context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
+  
 
     const countries = topojson.feature(world, world.objects.countries).features;
 
-    
-
-    // d3.timer(function(elapsed) {
-      
-    // let rotation = 0.0;
+    // Some points on the Earth
+    const points = [[125.762524, 39.039219]];
 
     document.addEventListener('mark', mark);
 
     function mark (event) {
         d3.transition()
-          .delay(0)
-          .duration(900)
+          .delay(10)
+          .duration(1200)
           .tween("rotate", function() {
               var p = d3.geoCentroid(countries[event.detail.activated.idx]);
-              // console.log(d3.geoCentroid(countries[event.detail.activated.idx]););
               var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
               return function (t) {
                 projection.rotate(r(t));
 
+                // Clear the canvas ready for redraw
                 context.clearRect(0, 0, width, height);
 
-                context.beginPath();
-                path(topojson.mesh(world));
-                context.stroke();
+                // context.beginPath();
+                // path(topojson.feature(world, world.objects.land));
+                // path(topojson.mesh(world));
+                // context.fill();
+                // context.stroke();
+                context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
+                context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
               }
           });
     }
@@ -89,9 +86,6 @@ class Canvas extends Component {
     //   context.stroke();
     // }
 
-      
-
-    // });
 
 
   }
