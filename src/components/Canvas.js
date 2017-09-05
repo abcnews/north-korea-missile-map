@@ -34,7 +34,8 @@ class Canvas extends Component {
 
     const land = topojson.feature(world, world.objects.land),
           countries = topojson.feature(world, world.objects.countries).features,
-          borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; });
+          borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }),
+          globe = {type: "Sphere"};
 
 
     const launchPoint = [125.6, 10.1];
@@ -50,7 +51,8 @@ class Canvas extends Component {
       context.clearRect(0, 0, width, height);
 
       context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
-      context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
+      context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke()
+      
 
       var circle = d3.geoCircle().center([125.7625, 39.0392]).radius(20);
 
@@ -58,6 +60,8 @@ class Canvas extends Component {
       context.strokeStyle = "red";
       path(circle());
       context.stroke();
+
+      context.strokeStyle = "#000", context.lineWidth = 2, context.beginPath(), path(globe), context.stroke();
 
       // context.beginPath();
       // context.fillStyle = 'rgba(255, 0, 0, 0.2';
