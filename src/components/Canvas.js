@@ -4,8 +4,8 @@ const d3 = require('d3');
 
 const styles = require('./Canvas.scss');
 
-var width = 700,
-    height = 700;
+var width = 600,
+    height = 600;
 
 
 class Canvas extends Component {
@@ -17,76 +17,73 @@ class Canvas extends Component {
       .translate([width / 2, height / 2])
       .clipAngle(90)
       .precision(0.1)
-      .rotate([-125.762524, -39.039219]) // Starting point
-      .fitSize([width, height], topojson.mesh(world));
+      .fitSize([width, height], topojson.mesh(world))
+      .scale(299);
 
     var base = d3.select('#canvas #map');
-    var chart = base.append('canvas')
+    var canvas = base.append('canvas')
       .classed(styles.scalingCanvas, true)
       .attr('width', width)
       .attr('height', height);
 
-    var context = chart.node().getContext("2d");
+    var context = canvas.node().getContext("2d");
 
     var path = d3.geoPath()
       .projection(projection)
       .context(context);
 
     const land = topojson.feature(world, world.objects.land),
+          countries = topojson.feature(world, world.objects.countries).features,
           borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; });
 
+
+    const launchPoint = [125.6, 10.1];
+
+
+    // do your drawing stuff here
     // Draw the initial Globe
+    const initialPoint = d3.geoCentroid(countries[8])
+    projection.rotate([-125.7625, -39.0392]);//[-initialPoint[0], -initialPoint[1]]) // Starting point
 
-    context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
-    context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
-  
+    function drawWorld() {
+      // Clear the canvas ready for redraw
+      context.clearRect(0, 0, width, height);
 
-    const countries = topojson.feature(world, world.objects.countries).features;
+      context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
+      context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
 
-    // Some points on the Earth
-    const points = [[125.762524, 39.039219]];
+      var circle = d3.geoCircle().center([125.7625, 39.0392]).radius(20);
 
+      context.beginPath();
+      context.strokeStyle = "red";
+      path(circle());
+      context.stroke();
+
+      // context.beginPath();
+      // context.fillStyle = 'rgba(255, 0, 0, 0.2';
+      // path(circle());
+      // context.fill();
+    }
+    
+    drawWorld();
+
+    // Start our scrollyteller stuff
     document.addEventListener('mark', mark);
 
     function mark (event) {
-        d3.transition()
-          .delay(10)
-          .duration(1200)
-          .tween("rotate", function() {
-              var p = d3.geoCentroid(countries[event.detail.activated.idx]);
-              var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
-              return function (t) {
-                projection.rotate(r(t));
-
-                // Clear the canvas ready for redraw
-                context.clearRect(0, 0, width, height);
-
-                // context.beginPath();
-                // path(topojson.feature(world, world.objects.land));
-                // path(topojson.mesh(world));
-                // context.fill();
-                // context.stroke();
-                context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
-                context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
-              }
-          });
+      console.log(event)
+      d3.transition()
+        .delay(10)
+        .duration(1200)
+        .tween("rotate", function() {
+            var p = d3.geoCentroid(countries[event.detail.activated.idx + 128]);
+            var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+            return function (t) {
+              projection.rotate(r(t));
+              drawWorld();
+            }
+        });
     }
-
-    // var fps = 5;
-    // // d3.interval(mark, 1000 / fps);
-    
-    // function mark (event) {
-    //   context.clearRect(0, 0, width, height);
-
-    //   projection.rotate([rotation, 0]);
-    //   rotation += velocity;
-    //   context.beginPath();
-    //   path(topojson.mesh(world));
-    //   context.strokeStyle = "green";
-    //   context.stroke();
-    // }
-
-
 
   }
   shouldComponentUpdate() {
