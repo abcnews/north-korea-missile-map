@@ -4,7 +4,7 @@
 }
 
 .responsive-container {
-  max-width: 700px;
+  max-width: 600px;
   margin: auto;
 }
 
@@ -16,10 +16,10 @@
   padding-bottom: 100%;
   /* override this inline for aspect ratio other than square */
 }
-.scaling-svg {
-  position: absolute;
-  height: 100%;
+.scaling-canvas {
+  // position: absolute;
+  // height: 100%;
   width: 100%;
-  left: 0;
-  top: 0;
+  // left: 0;
+  // top: 0;
 }

@@ -4,35 +4,33 @@ const d3 = require('d3');
 
 const styles = require('./Canvas.scss');
 
-var width = 750,
+var width = 700,
     height = 700;
 
-var velocity = .2;
-
-
+var velocity = .1;
 
 
 class Canvas extends Component {
   componentDidMount() {
     const world = require("./world-data/world-simple.topo.json");
 
-    // Set up a D3 procection here 
+    // Set up a D3 projection here 
     var projection = d3.geoOrthographic()
       .scale(170)
       .translate([width / 2, height / 2])
+      .clipAngle(90)
       .precision(.1)
       .fitSize([width, height], topojson.mesh(world));
 
     var base = d3.select('#canvas #map');
     var chart = base.append('canvas')
+      .classed(styles.scalingCanvas, true)
       .attr('width', width)
       .attr('height', height);
 
-    console.log(canvas);
+    // console.log(canvas);
 
     var context = chart.node().getContext("2d");
-
-
 
     var path = d3.geoPath()
       .projection(projection)
@@ -47,125 +45,54 @@ class Canvas extends Component {
     context.strokeStyle = "green";
     context.stroke();
 
+    const countries = topojson.feature(world, world.objects.countries).features;
+
+    
+
     // d3.timer(function(elapsed) {
       
-    let rotation = 0.0;
+    // let rotation = 0.0;
 
-      // document.addEventListener('mark', mark);
+    document.addEventListener('mark', mark);
 
-      var fps = 25
-      function animate() {
-        mark();
-        setTimeout(function() {
-          requestAnimationFrame(animate);
-        }, 1000 / fps);
-      }
-      animate();
-      // setInterval(mark, 100);
-      
-      function mark (event) {
-        
-        context.clearRect(0, 0, width, height);
+    function mark (event) {
+        d3.transition()
+          .delay(0)
+          .duration(900)
+          .tween("rotate", function() {
+              var p = d3.geoCentroid(countries[event.detail.activated.idx]);
+              // console.log(d3.geoCentroid(countries[event.detail.activated.idx]););
+              var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+              return function (t) {
+                projection.rotate(r(t));
 
-        projection.rotate([rotation, 0]);
-        rotation += velocity;
-        context.beginPath();
-        path(topojson.mesh(world));
-        context.strokeStyle = "green";
-        context.stroke();
-      }
+                context.clearRect(0, 0, width, height);
 
-    // });
+                context.beginPath();
+                path(topojson.mesh(world));
+                context.stroke();
+              }
+          });
+    }
 
-    // // Create an in memory only element of type 'custom'
-    // var detachedContainer = document.createElement("custom");
+    // var fps = 5;
+    // // d3.interval(mark, 1000 / fps);
+    
+    // function mark (event) {
+    //   context.clearRect(0, 0, width, height);
 
-    // // Create a d3 selection for the detached container. We won't
-    // // actually be attaching it to the DOM.
-    // var dataContainer = d3.select(detachedContainer);
-
-    // function drawCustom(data) {
-    //   var scale = d3.scaleLinear()
-    //     .range([10, 390])
-    //     .domain(d3.extent(data));
-
-    //   var dataBinding = dataContainer.selectAll("custom.rect")
-    //     .data(data, function(d) { return d; });
-
-    //     dataBinding
-    //       .attr("size", 8)
-    //       .transition()
-    //       .duration(1000)
-    //       .attr("size", 15)
-    //       .attr("fillStyle", "green");
-
-    //     // for new elements, create a 'custom' dom node, of class rect
-    //     // with the appropriate rect attributes
-    //     dataBinding.enter()
-    //       .append("custom")
-    //       .classed("rect", true)
-    //       .attr("x", scale)
-    //       .attr("y", 100)
-    //       .attr("size", 8)
-    //       .attr("fillStyle", "red");
-
-    //     dataBinding.exit()
-    //       .attr("size", 8)
-    //       .transition()
-    //       .duration(1000)
-    //       .attr("size", 5)
-    //       .attr("fillStyle", "lightgrey");
-
-    //   // drawCanvas();
+    //   projection.rotate([rotation, 0]);
+    //   rotation += velocity;
+    //   context.beginPath();
+    //   path(topojson.mesh(world));
+    //   context.strokeStyle = "green";
+    //   context.stroke();
     // }
 
-    // function drawCanvas() {
       
-    //     // clear canvas
-    //     context.fillStyle = "#111";
-    //     context.rect(0,0,chart.attr("width"),chart.attr("height"));
-    //     context.fill();
-      
-    //     var elements = dataContainer.selectAll("custom.rect");
-    //     elements.each(function(d) {
-    //       var node = d3.select(this);
-      
-    //       context.beginPath();
-    //       context.fillStyle = node.attr("fillStyle");
-    //       context.rect(node.attr("x"), node.attr("y"), node.attr("size"), node.attr("size"));
-    //       context.fill();
-    //       context.closePath();
-      
-    //     });
-    //   }
 
-      // d3.timer(drawCanvas);
-      // drawCustom([1,2,3,4,5,7]);
-
-      // drawCustom([1,2,4,5,6]);
-      
-      // uncomment this, to see the transition~
-      // drawCustom([1,2,12,16,20]);
-
-      // drawCustom([1,3,12,19,20, 23, 24]);
-    
-    // var context = canvas.node().getContext('2d');
-
-    // var context = chart.node().getContext("2d");
-    // var data = [1, 2, 6, 13, 20, 23, 26, 27, 32];
-    
-    // var scale = d3.scaleLinear()
-    //   .domain([1,100])
-    //   .range([0, width]);
-      
-    
-    // data.forEach(function(d, i) {
-    //   context.beginPath();
-    //   context.rect(scale(d), scale(d), 10, 10);
-    //   context.fillStyle="red";
-    //   context.fill();
-    //   context.closePath();
     // });
+
 
   }
   shouldComponentUpdate() {
