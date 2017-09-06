@@ -7,17 +7,32 @@ const styles = require('./Canvas.scss');
 var width = 600,
     height = 600;
 
+const launchPoint = [125.7625, 39.0392]; // Pyongyang
+
+const spinPoints = [
+  [125.7625, 39.0392], // Pyongyang, North Koreo
+  [153.021072, -27.470125], // Brisbane, Australia
+  [201.736328, 55.545804], // It's so cold in Alaska
+  [125.7625, 39.0392], // Pyongyang, North Koreo
+];
+
 
 class Canvas extends Component {
   componentDidMount() {
     const world = require("./world-data/world-simple.topo.json");
 
+    const land = topojson.feature(world, world.objects.land),
+    countries = topojson.feature(world, world.objects.countries).features,
+    borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }),
+    globe = {type: "Sphere"};
+
     // Set up a D3 projection here 
     var projection = d3.geoOrthographic()
       .translate([width / 2, height / 2])
+      // .center(launchPoint)
       .clipAngle(90)
       .precision(0.1)
-      .fitSize([width, height], topojson.mesh(world))
+      .fitSize([width, height], globe)
       .scale(299);
 
     var base = d3.select('#canvas #map');
@@ -32,18 +47,6 @@ class Canvas extends Component {
       .projection(projection)
       .context(context);
 
-    const land = topojson.feature(world, world.objects.land),
-          countries = topojson.feature(world, world.objects.countries).features,
-          borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }),
-          globe = {type: "Sphere"};
-
-    const launchPoint = [125.7625, 39.0392]; // Pyongyang
-
-    const spinPoints = [
-      [125.7625, 39.0392], // Pyongyang
-      [153.021072, -27.470125] // Brisbane
-    ];
-
 
     // do your drawing stuff here
     // Draw the initial Globe
@@ -51,7 +54,8 @@ class Canvas extends Component {
     projection.rotate([ -initialPoint[0], -initialPoint[1] ]); //Starting point
 
     function drawWorld() {
-      var circle = d3.geoCircle().center(spinPoints[0]).radius(kmsToRadius(6700));
+      const pyongyang = d3.geoCircle().center(spinPoints[0]).radius(kmsToRadius(70));
+      const currentRange = d3.geoCircle().center(spinPoints[0]).radius(kmsToRadius(6700));
 
       // Clear the canvas ready for redraw
       context.clearRect(0, 0, width, height);
@@ -70,11 +74,18 @@ class Canvas extends Component {
       path(borders);
       context.stroke();
 
+      // Point out Pyongyang
+      context.beginPath();
+      context.fillStyle = "red";
+      path(pyongyang());
+      context.fill();
+
+
       // Draw circle radius
       context.beginPath();
       context.strokeStyle = "red";
       context.lineWidth = 1.5;
-      path(circle());
+      path(currentRange());
       context.stroke();
 
       // Draw a circle outline around the world
@@ -84,10 +95,10 @@ class Canvas extends Component {
       path(globe)
       context.stroke();
 
-      // Fill in the circle
+      // Fill in the circle radius
       context.beginPath();
       context.fillStyle = 'rgba(255, 0, 0, 0.07';
-      path(circle());
+      path(currentRange());
       context.fill();
     }
     
@@ -102,15 +113,14 @@ class Canvas extends Component {
         .delay(10)
         .duration(1200)
         .tween("rotate", function() {
-          console.log(spinPoints);
-            var p = spinPoints[event.detail.activated.idx];
-            if (p) {
-              var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
-              return function (t) {
-                projection.rotate(r(t));
-                drawWorld();
-              }
+          var p = spinPoints[event.detail.activated.idx];
+          if (p) {
+            var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+            return function (t) {
+              projection.rotate(r(t));
+              drawWorld();
             }
+          }
         });
     }
 
