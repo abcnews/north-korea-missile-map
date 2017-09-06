@@ -38,7 +38,7 @@ class Canvas extends Component {
           globe = {type: "Sphere"};
 
 
-    const launchPoint = [125.6, 10.1];
+    const launchPoint = [125.7625, 39.0392];
 
 
     // do your drawing stuff here
@@ -47,21 +47,42 @@ class Canvas extends Component {
     projection.rotate([-125.7625, -39.0392]);//[-initialPoint[0], -initialPoint[1]]) // Starting point
 
     function drawWorld() {
+      var circle = d3.geoCircle().center(launchPoint).radius(45);
+
       // Clear the canvas ready for redraw
       context.clearRect(0, 0, width, height);
 
-      context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
-      context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke()
-      
+      // Draw landmass
+      context.beginPath();
+      context.fillStyle = 'grey';
+      path(land);
+      context.fill();
 
-      var circle = d3.geoCircle().center([125.7625, 39.0392]).radius(20);
+      // context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
+      // context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
 
+      // Draw outline of countries
+      context.beginPath();
+      context.strokeStyle = "#ccc";
+      context.lineWidth = 1;
+      path(borders);
+      context.stroke();
+
+      // Draw circle radius
       context.beginPath();
       context.strokeStyle = "red";
+      context.lineWidth = 1.5;
       path(circle());
       context.stroke();
 
-      context.strokeStyle = "#000", context.lineWidth = 2, context.beginPath(), path(globe), context.stroke();
+      // Draw a circle outline around the world
+      context.beginPath()
+      context.strokeStyle = "#111"
+      context.lineWidth = 2
+      path(globe)
+      context.stroke();
+
+      // context.strokeStyle = "#000", context.lineWidth = 2, context.beginPath(), path(globe), context.stroke();
 
       // context.beginPath();
       // context.fillStyle = 'rgba(255, 0, 0, 0.2';
