@@ -2,7 +2,7 @@ const {h, Component} = require('preact');
 const topojson = require("topojson");
 const d3 = require('d3');
 
-const styles = require('./Canvas.scss');
+const styles = require('./Globe.scss');
 
 var width = 600,
     height = 600;
@@ -17,7 +17,7 @@ const spinPoints = [
 ];
 
 
-class Canvas extends Component {
+class Globe extends Component {
   componentDidMount() {
     const world = require("./world-data/world-simple.topo.json");
 
@@ -35,9 +35,9 @@ class Canvas extends Component {
       .fitSize([width, height], globe)
       .scale(299);
 
-    var base = d3.select('#canvas #map');
+    var base = d3.select('#globe #map');
     var canvas = base.append('canvas')
-      .classed(styles.scalingCanvas, true)
+      .classed(styles.scalingGlobe, true)
       .attr('width', width)
       .attr('height', height);
 
@@ -51,7 +51,7 @@ class Canvas extends Component {
     // do your drawing stuff here
     // Draw the initial Globe
     const initialPoint = spinPoints[0];
-    projection.rotate([ -initialPoint[0], -initialPoint[1] ]); //Starting point
+    projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
     function drawWorld() {
       const pyongyang = d3.geoCircle().center(spinPoints[0]).radius(kmsToRadius(70));
@@ -130,7 +130,7 @@ class Canvas extends Component {
   }
   render() {
     return (
-      <div id="canvas" className={"u-full " + styles.wrapper} aria-label="A map">
+      <div id="globe" className={"u-full " + styles.wrapper} aria-label="A map">
         <div className={styles.responsiveContainer}>
           <div id="map" className={styles.scalingContainer}
             style={"padding-bottom: " + height / width * 100 + "%"}></div>
@@ -146,4 +146,4 @@ function kmsToRadius (kms) {
 }
 
 
-module.exports = Canvas;
+module.exports = Globe;
