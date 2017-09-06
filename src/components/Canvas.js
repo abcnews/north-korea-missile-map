@@ -37,17 +37,21 @@ class Canvas extends Component {
           borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }),
           globe = {type: "Sphere"};
 
+    const launchPoint = [125.7625, 39.0392]; // Pyongyang
 
-    const launchPoint = [125.7625, 39.0392];
+    const spinPoints = [
+      [125.7625, 39.0392], // Pyongyang
+      [153.021072, -27.470125] // Brisbane
+    ];
 
 
     // do your drawing stuff here
     // Draw the initial Globe
-    const initialPoint = d3.geoCentroid(countries[8])
-    projection.rotate([-125.7625, -39.0392]);//[-initialPoint[0], -initialPoint[1]]) // Starting point
+    const initialPoint = spinPoints[0];
+    projection.rotate([ -initialPoint[0], -initialPoint[1] ]); //Starting point
 
     function drawWorld() {
-      var circle = d3.geoCircle().center(launchPoint).radius(45);
+      var circle = d3.geoCircle().center(spinPoints[0]).radius(kmsToRadius(6700));
 
       // Clear the canvas ready for redraw
       context.clearRect(0, 0, width, height);
@@ -58,8 +62,6 @@ class Canvas extends Component {
       path(land);
       context.fill();
 
-      // context.fillStyle = 'grey', context.beginPath(), path(land), context.fill();
-      // context.strokeStyle = "#ccc",  context.beginPath(), path(borders), context.stroke();
 
       // Draw outline of countries
       context.beginPath();
@@ -82,12 +84,11 @@ class Canvas extends Component {
       path(globe)
       context.stroke();
 
-      // context.strokeStyle = "#000", context.lineWidth = 2, context.beginPath(), path(globe), context.stroke();
-
-      // context.beginPath();
-      // context.fillStyle = 'rgba(255, 0, 0, 0.2';
-      // path(circle());
-      // context.fill();
+      // Fill in the circle
+      context.beginPath();
+      context.fillStyle = 'rgba(255, 0, 0, 0.07';
+      path(circle());
+      context.fill();
     }
     
     drawWorld();
@@ -101,11 +102,14 @@ class Canvas extends Component {
         .delay(10)
         .duration(1200)
         .tween("rotate", function() {
-            var p = d3.geoCentroid(countries[event.detail.activated.idx + 128]);
-            var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
-            return function (t) {
-              projection.rotate(r(t));
-              drawWorld();
+          console.log(spinPoints);
+            var p = spinPoints[event.detail.activated.idx];
+            if (p) {
+              var r = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+              return function (t) {
+                projection.rotate(r(t));
+                drawWorld();
+              }
             }
         });
     }
@@ -124,6 +128,11 @@ class Canvas extends Component {
       </div>
     );
   }
+}
+
+// Some functions
+function kmsToRadius (kms) {
+  return kms / 111.319444
 }
 
 
