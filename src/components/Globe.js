@@ -1,6 +1,7 @@
 const {h, Component} = require('preact');
-const topojson = require("topojson");
-const d3 = require('d3');
+const topojson = require('topojson');
+// const d3 = require('d3');
+import d3 from './d3-custom';
 
 const styles = require('./Globe.scss');
 
@@ -13,7 +14,7 @@ const spinPoints = [
   [125.7625, 39.0392], // Pyongyang, North Koreo
   [153.021072, -27.470125], // Brisbane, Australia
   [201.736328, 55.545804], // It's so cold in Alaska
-  [125.7625, 39.0392], // Pyongyang, North Koreo
+  [125.7625, 39.0392], // Pyongyang, North Korea
 ];
 
 
@@ -142,7 +143,7 @@ class Globe extends Component {
 
 // Some functions
 function kmsToRadius (kms) {
-  return kms / 111.319444
+  return kms / 111.319444 // This many kilometres per degree
 }
 
 

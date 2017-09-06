@@ -6,8 +6,6 @@ const Globe = require('./Globe');
 
 
 
-
-
 class App extends Component {
   render() {
     return (
