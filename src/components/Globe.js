@@ -17,14 +17,18 @@ const spinPoints = [
   [125.7625, 39.0392], // Pyongyang, North Korea
 ];
 
+const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
+const geojsonUrl = placeholder.dataset.geojson;
+
 
 class Globe extends Component {
   componentDidMount() {
     d3.queue(3)
-      .defer(d3.json, "./world-data/world-simple.topo.json")
+      .defer(d3.json, geojsonUrl)
       .awaitAll(dataLoaded);
     // const world = require("./world-data/world-simple.topo.json");
     function dataLoaded(error, data) {
+      if (error) throw error;
       console.log(data);
       const land = topojson.feature(data[0], data[0].objects.land),
       countries = topojson.feature(data[0], data[0].objects.countries).features,
@@ -107,7 +111,7 @@ class Globe extends Component {
         context.fillStyle = 'rgba(255, 0, 0, 0.07';
         path(currentRange());
         context.fill();
-      }
+      } // drawWorld function
 
       // Start our scrollyteller stuff
       document.addEventListener('mark', mark);
@@ -127,7 +131,7 @@ class Globe extends Component {
               }
             }
           });
-      }
+      } // mark function
     }
 
   }
