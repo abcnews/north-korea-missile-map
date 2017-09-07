@@ -10,7 +10,7 @@ if (stage) {
   });
 } else {
   console.log('waiting for the stage');
-  // document.addEventListener('mark', init);
+  document.removeEventListener('mark', init);
 
   document.arrive(".scrollyteller-stage", function() {
     console.log('Stage has arrived...');
