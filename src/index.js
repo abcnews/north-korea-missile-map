@@ -10,7 +10,6 @@ if (stage) {
   });
 } else {
   console.log('waiting for the stage');
-  document.removeEventListener('mark', init);
 
   document.arrive(".scrollyteller-stage", function() {
     console.log('Stage has arrived...');
@@ -27,8 +26,8 @@ if (stage) {
 
 
 function init(ev) {
-  // console.log(ev.target); // the stage element
-  // console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
+  console.log(ev.target); // the stage element
+  console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
 
   const App = require('./components/App');
   render(<App />, stage, stage.firstChild);
