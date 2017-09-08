@@ -20,24 +20,7 @@ const spinPoints = [
 
 const rangeDistances = [500, 6700, 6700, 8000, 400]; // Will use hashes instead
 
-const storyData = [
-  {
-    "id": "pyongyang",
-    "longlat": [125.7625, 39.0392]
-  },
-  {
-    "id": "brisbane",
-    "longlat": [153.021072, -27.470125]
-  },
-  {
-    "id": "alaska",
-    "longlat": [201.736328, 55.545804]
-  }
-];
 
-function getItem(id) {
-  return storyData.find(item => item.id === id);
-}
 
 // New es6 way if undexing an array of objects
 // console.log(storyData.find(item => item.id === "pyongyang"));
@@ -45,9 +28,7 @@ function getItem(id) {
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
 const geojsonUrl = placeholder.dataset.geojson;
 
-let currentLocationId = "pyongyang",
-    currentRangeInKms = 1300,
-    previousRangeInKms = 400;
+
 
 
 function dataLoaded(error, data) {
@@ -57,6 +38,31 @@ function dataLoaded(error, data) {
   countries = topojson.feature(data[0], data[0].objects.countries).features,
   borders = topojson.mesh(data[0], data[0].objects.countries, function(a, b) { return a !== b; }),
   globe = {type: "Sphere"};
+
+  const storyData = data[1];
+  
+  // {"locations": [
+  //   {
+  //     "id": "pyongyang",
+  //     "longlat": [125.7625, 39.0392]
+  //   },
+  //   {
+  //     "id": "brisbane",
+  //     "longlat": [153.021072, -27.470125]
+  //   },
+  //   {
+  //     "id": "alaska",
+  //     "longlat": [201.736328, 55.545804]
+  //   }
+  // ]};
+
+  function getItem(id) {
+    return storyData.locations.find(item => item.id === id);
+  }
+
+  let currentLocationId = "pyongyang",
+      currentRangeInKms = 0,
+      previousRangeInKms = 0;
 
   // Set up a D3 projection here 
   var projection = d3.geoOrthographic()
@@ -147,16 +153,19 @@ function dataLoaded(error, data) {
 
 
   mark = function (event) {
-    console.log(event.detail.activated.config)
+    console.log("activated: ", event.detail.activated.config)
+    console.log("deactivated: ", event.detail.deactivated.config)
+
+    currentLocationId = event.detail.activated.config.id;
 
     currentRangeInKms = event.detail.activated.config.range;
-    previousRangeInKms = event.detail.deactivated.config.range
+    previousRangeInKms = event.detail.deactivated.config.range;
 
     d3.transition()
       .delay(10)
       .duration(1200)
       .tween("rotate", function() {
-        var p = spinPoints[event.detail.activated.idx];
+        var p = getItem(currentLocationId).longlat; // spinPoints[event.detail.activated.idx];
         if (p) {
           let rotation = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
           let radius = d3.interpolate(
@@ -181,6 +190,7 @@ class Globe extends Component {
   componentDidMount() {
     d3.queue(3)
       .defer(d3.json, geojsonUrl)
+      .defer(d3.json, "http://nucwed.aus.aunty.abc.net.au/cm/code/8886258/story-data.json.js")
       .awaitAll(dataLoaded);
     // const world = require("./world-data/world-simple.topo.json");
   }
