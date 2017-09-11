@@ -27,6 +27,7 @@ const rangeDistances = [500, 6700, 6700, 8000, 400]; // Will use hashes instead
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
 const geojsonUrl = placeholder.dataset.geojson;
+const storyDataUrl = placeholder.dataset.storydata;
 
 
 
@@ -190,7 +191,7 @@ class Globe extends Component {
   componentDidMount() {
     d3.queue(3)
       .defer(d3.json, geojsonUrl)
-      .defer(d3.json, "http://nucwed.aus.aunty.abc.net.au/cm/code/8886258/story-data.json.js")
+      .defer(d3.json, storyDataUrl)
       .awaitAll(dataLoaded);
     // const world = require("./world-data/world-simple.topo.json");
   }

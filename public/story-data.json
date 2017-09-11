@@ -1,0 +1,14 @@
+{"locations": [
+  {
+    "id": "pyongyang",
+    "longlat": [125.7625, 39.0392]
+  },
+  {
+    "id": "brisbane",
+    "longlat": [153.021072, -27.470125]
+  },
+  {
+    "id": "alaska",
+    "longlat": [201.736328, 55.545804]
+  }
+]}
