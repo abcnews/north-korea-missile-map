@@ -43,7 +43,8 @@ function dataLoaded(error, data) {
 
   let currentLocationId = "pyongyang",
       currentRangeInKms = 400,
-      previousRangeInKms = 400;
+      previousRangeInKms = 400,
+      currentMarker = null;
 
   // Set up a D3 projection here 
   const projection = d3.geoOrthographic()
@@ -82,44 +83,23 @@ function dataLoaded(error, data) {
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
   // Red dot to mark launch site
-  const pyongyang = d3.geoCircle()
-                      .center(focusPoint)
-                      .radius(kmsToRadius(70));
+  const launchPointCircle = d3.geoCircle()
+                              .center(focusPoint)
+                              .radius(kmsToRadius(70));
 
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
 
 
+
+  const markerCircle = d3.geoCircle()
+                        // .center(getItem(currentMarker).longlat)
+                        .radius(kmsToRadius(70));
+  
+
+
   drawWorld();
-
-  // Handle screen resizes
-  resizeCanvas = function () {
-    screenWidth = window.innerWidth;
-    screenHeight = window.innerHeight;
-
-    // globeScale = 100;
-
-    setMargins();
-
-    canvas.attr('width', screenWidth)
-          .attr('height', screenHeight);
-
-    projection.translate([screenWidth / 2, screenHeight / 2])
-              .fitExtent([
-                [margins, margins], 
-                [screenWidth -margins, screenHeight -margins]], 
-                 globe);
-
-    initialGlobeScale = projection.scale();
-
-    projection.scale(projection.scale() * globeScale / 100);
-
-    // Pixel display and High DPI monitor scaling
-    canvasDpiScaler(canvasEl, context);
-
-    drawWorld();
-  }
 
   // Clear and render a frame of each part of the globe
   function drawWorld() {
@@ -143,7 +123,7 @@ function dataLoaded(error, data) {
     // Point out Pyongyang
     context.beginPath();
     context.fillStyle = "red";
-    path(pyongyang());
+    path(launchPointCircle());
     context.fill();
 
     // Draw circle radius
@@ -171,7 +151,11 @@ function dataLoaded(error, data) {
     // Reset global alpha
     context.globalAlpha = 1;
 
-
+    // Draw a comparison marker
+    context.beginPath();
+    context.fillStyle = "blue";
+    path(markerCircle());
+    context.fill();
 
   } // drawWorld function
 
@@ -179,9 +163,20 @@ function dataLoaded(error, data) {
 
   mark = function (event) {
     console.log("activated: ", event.detail.activated.config)
-    console.log("deactivated: ", event.detail.deactivated ? event.detail.deactivated.config : "not defined")
+    // console.log("deactivated: ", event.detail.deactivated ? event.detail.deactivated.config : "not defined")
 
     currentLocationId = event.detail.activated.config.id;
+    currentMarker = event.detail.activated.config.marker || null;
+
+    console.log(getItem(currentMarker));
+
+    // If marker is set 
+    if (currentMarker) {
+      markerCircle.center(getItem(currentMarker).longlat)
+        .radius(kmsToRadius(50));
+    } else {
+      markerCircle.radius(0);
+    }
 
     currentRangeInKms = event.detail.activated.config.range;
     previousRangeInKms = event.detail.deactivated ? event.detail.deactivated.config.range : 0;
@@ -213,6 +208,34 @@ function dataLoaded(error, data) {
       });
       console.log("Current projection scale: " + projection.scale());
   }; // mark function
+
+  // Handle screen resizes
+  resizeCanvas = function () {
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+
+    // globeScale = 100;
+
+    setMargins();
+
+    canvas.attr('width', screenWidth)
+          .attr('height', screenHeight);
+
+    projection.translate([screenWidth / 2, screenHeight / 2])
+              .fitExtent([
+                [margins, margins], 
+                [screenWidth -margins, screenHeight -margins]], 
+                 globe);
+
+    initialGlobeScale = projection.scale();
+
+    projection.scale(projection.scale() * globeScale / 100);
+
+    // Pixel display and High DPI monitor scaling
+    canvasDpiScaler(canvasEl, context);
+
+    drawWorld();
+  }
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);

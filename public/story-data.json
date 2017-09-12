@@ -13,5 +13,10 @@
     "id": "alaska",
     "name": "Alaska",
     "longlat": [201.736328, 55.545804]
+  },
+  {
+    "id": "guam",
+    "name": "Guam",
+    "longlat": [144.793732, 13.444304]
   }
 ]}
