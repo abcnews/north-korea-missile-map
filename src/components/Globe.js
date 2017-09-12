@@ -6,22 +6,16 @@ import d3 from './d3-custom';
 
 const styles = require('./Globe.scss');
 
-let mark; // Make marker function "global" so we can unmount?
+let mark, // Make marker functions file scoped so we can unmount?
+    canvasSize; 
 
-const width = 600,
-      height = 600;
+let screenWidth = window.innerWidth,
+    screenHeight = window.innerHeight,
+    initialGlobeScale,
+    globeScale = 100; // Percent
 
-// const spinPoints = [
-//   [125.7625, 39.0392], // Pyongyang, North Korea
-//   [153.021072, -27.470125], // Brisbane, Australia
-//   [201.736328, 55.545804], // It's so cold in Alaska
-//   [125.7625, 39.0392], // Pyongyang, North Korea
-//   [125.7625, 39.0392], // Pyongyang, North Korea
-// ];
 
 let focusPoint = [125.7625, 39.0392]; // Pyongyang, North Korea
-
-// const rangeDistances = [500, 6700, 6700, 8000, 400]; // Will use hashes instead
 
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
@@ -39,36 +33,39 @@ function dataLoaded(error, data) {
 
   const storyData = data[1];
 
-// Indexing an array of objects
-// console.log(storyData.find(item => item.id === "pyongyang"));
-function getItem(id) {
-  return storyData.locations.find(item => item.id === id);
-}
+  // Indexing an array of objects
+  // console.log(storyData.find(item => item.id === "pyongyang"));
+  function getItem(id) {
+    return storyData.locations.find(item => item.id === id);
+  }
 
   let currentLocationId = "pyongyang",
-      currentRangeInKms = 0,
-      previousRangeInKms = 0;
+      currentRangeInKms = 400,
+      previousRangeInKms = 400;
 
   // Set up a D3 projection here 
   const projection = d3.geoOrthographic()
-    .translate([width / 2, height / 2])
+    .translate([screenWidth / 2, screenHeight / 2])
     .clipAngle(90)
     .precision(0.1)
-    .fitSize([width, height], globe)
-    .scale(299);
+    .fitExtent([[100,100], [screenWidth -100, screenHeight -100]], globe);
+    // .fitSize([width, height], globe)
+    // .scale(299);
+
+  initialGlobeScale = projection.scale();
+  console.log('Initial globe scale: ' + initialGlobeScale);
 
   const base = d3.select('#globe #map');
 
   const canvas = base.append('canvas')
     .classed(styles.scalingGlobe, true)
     .attr('id', 'globe-canvas')
-    .attr('width', width)
-    .attr('height', height);
+    .attr('width', screenWidth)
+    .attr('height', screenHeight);
 
   const context = canvas.node().getContext('2d');
-
-  const canvasEl= document.getElementById('globe-canvas');
-
+  const canvasEl = document.getElementById('globe-canvas');
+  // Pixel display and High DPI monitor scaling
   canvasDpiScaler(canvasEl, context);
 
 
@@ -94,11 +91,32 @@ function getItem(id) {
 
   drawWorld();
 
+  // Handle screen resizes
+  canvasSize = function () {
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+
+    canvas.attr('width', screenWidth)
+          .attr('height', screenHeight);
+
+    projection.translate([screenWidth / 2, screenHeight / 2])
+              .fitExtent([[100,100], [screenWidth -100, screenHeight -100]], globe);
+
+    projection.scale(projection.scale() * globeScale / 100);
+    
+    
+
+    // Pixel display and High DPI monitor scaling
+    canvasDpiScaler(canvasEl, context);
+
+    drawWorld();
+  }
+
   // Clear and render a frame of each part of the globe
   function drawWorld() {
 
     // Clear the canvas ready for redraw
-    context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, screenWidth, screenHeight);
 
     // Draw landmass
     context.beginPath();
@@ -144,12 +162,16 @@ function getItem(id) {
 
   mark = function (event) {
     console.log("activated: ", event.detail.activated.config)
-    console.log("deactivated: ", event.detail.deactivated.config)
+    console.log("deactivated: ", event.detail.deactivated ? event.detail.deactivated.config : "not defined")
 
     currentLocationId = event.detail.activated.config.id;
 
     currentRangeInKms = event.detail.activated.config.range;
-    previousRangeInKms = event.detail.deactivated.config.range;
+    previousRangeInKms = event.detail.deactivated ? event.detail.deactivated.config.range : 0;
+
+    globeScale = event.detail.activated.config.scale || 100;
+
+    let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
     d3.transition()
       .delay(10)
@@ -157,22 +179,27 @@ function getItem(id) {
       .tween("rotate", function() {
         var p = getItem(currentLocationId).longlat;
         if (p) {
-          let rotation = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
-          let radius = d3.interpolate(
+          let rotationInterpolate = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+          let radiusInterpolate = d3.interpolate(
             kmsToRadius(previousRangeInKms), 
             kmsToRadius(currentRangeInKms)
           );
+          let scaleInterpolate = d3.interpolate(projection.scale(),
+                                                newGlobeScale);
           return function (time) {
-            projection.rotate(rotation(time));
-            rangeCircle.radius(radius(time));
+            projection.rotate(rotationInterpolate(time));
+            rangeCircle.radius(radiusInterpolate(time));
+            projection.scale(scaleInterpolate(time));
             drawWorld();
           }
         }
       });
+      console.log("Current projection scale: " + projection.scale());
   }; // mark function
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);
+  window.addEventListener('resize', canvasSize, false);
 }
 
 
@@ -187,16 +214,20 @@ class Globe extends Component {
   componentWillUnmount() {
     console.log("Component unmounting remove event listeners etc...");
     document.removeEventListener('mark', mark);
+    window.removeEventListener('resize', canvasSize, false);
   }
   shouldComponentUpdate() {
     return false;
   }
   render() {
     return (
-      <div id="globe" className={"u-full " + styles.wrapper} aria-label="A map">
-        <div className={styles.responsiveContainer}>
+      <div id="globe" className={"u-full " + styles.wrapper} aria-label="A globe that spins and shows missile ranges.">
+        {/* <div className={styles.responsiveContainer}>
           <div id="map" className={styles.scalingContainer}
             style={"padding-bottom: " + height / width * 100 + "%"}></div>
+        </div> */}
+        <div id="map">
+            {/* Canvas gets appended here */}
         </div>
       </div>
     );
