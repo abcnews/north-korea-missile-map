@@ -6,14 +6,16 @@ import d3 from './d3-custom';
 
 const styles = require('./Globe.scss');
 
-let mark, // Make marker functions file scoped so we can unmount?
-    canvasSize; 
+let mark, // Widen scope so we can unmount?
+    resizeCanvas;
 
 let screenWidth = window.innerWidth,
     screenHeight = window.innerHeight,
     initialGlobeScale,
-    globeScale = 100; // Percent
+    globeScale = 100, // Percent
+    margins;
 
+setMargins();
 
 let focusPoint = [125.7625, 39.0392]; // Pyongyang, North Korea
 
@@ -48,7 +50,7 @@ function dataLoaded(error, data) {
     .translate([screenWidth / 2, screenHeight / 2])
     .clipAngle(90)
     .precision(0.1)
-    .fitExtent([[100,100], [screenWidth -100, screenHeight -100]], globe);
+    .fitExtent([[margins,margins], [screenWidth -margins, screenHeight -margins]], globe);
     // .fitSize([width, height], globe)
     // .scale(299);
 
@@ -92,19 +94,26 @@ function dataLoaded(error, data) {
   drawWorld();
 
   // Handle screen resizes
-  canvasSize = function () {
+  resizeCanvas = function () {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
+
+    // globeScale = 100;
+
+    setMargins();
 
     canvas.attr('width', screenWidth)
           .attr('height', screenHeight);
 
     projection.translate([screenWidth / 2, screenHeight / 2])
-              .fitExtent([[100,100], [screenWidth -100, screenHeight -100]], globe);
+              .fitExtent([
+                [margins, margins], 
+                [screenWidth -margins, screenHeight -margins]], 
+                 globe);
+
+    initialGlobeScale = projection.scale();
 
     projection.scale(projection.scale() * globeScale / 100);
-    
-    
 
     // Pixel display and High DPI monitor scaling
     canvasDpiScaler(canvasEl, context);
@@ -153,9 +162,17 @@ function dataLoaded(error, data) {
 
     // Fill in the circle radius
     context.beginPath();
-    context.fillStyle = 'rgba(255, 0, 0, 0.07';
+    context.globalAlpha = 0.07; // Maybe better Edge support
+    // context.fillStyle = 'rgba(255, 0, 0, 0.07';
+    context.fillStyle = 'red';
     path(rangeCircle());
     context.fill();
+
+    // Reset global alpha
+    context.globalAlpha = 1;
+
+
+
   } // drawWorld function
 
 
@@ -174,7 +191,7 @@ function dataLoaded(error, data) {
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
     d3.transition()
-      .delay(10)
+      .delay(0)
       .duration(1200)
       .tween("rotate", function() {
         var p = getItem(currentLocationId).longlat;
@@ -199,7 +216,7 @@ function dataLoaded(error, data) {
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);
-  window.addEventListener('resize', canvasSize, false);
+  window.addEventListener('resize', resizeCanvas);
 }
 
 
@@ -214,7 +231,7 @@ class Globe extends Component {
   componentWillUnmount() {
     console.log("Component unmounting remove event listeners etc...");
     document.removeEventListener('mark', mark);
-    window.removeEventListener('resize', canvasSize, false);
+    window.removeEventListener('resize', resizeCanvas);
   }
   shouldComponentUpdate() {
     return false;
@@ -222,13 +239,7 @@ class Globe extends Component {
   render() {
     return (
       <div id="globe" className={"u-full " + styles.wrapper} aria-label="A globe that spins and shows missile ranges.">
-        {/* <div className={styles.responsiveContainer}>
-          <div id="map" className={styles.scalingContainer}
-            style={"padding-bottom: " + height / width * 100 + "%"}></div>
-        </div> */}
-        <div id="map">
-            {/* Canvas gets appended here */}
-        </div>
+        <div id="map">{/* Canvas gets appended here */}</div>
       </div>
     );
   }
@@ -239,7 +250,14 @@ function kmsToRadius (kms) {
   return kms / 111.319444 // This many kilometres per degree
 }
 
+function setMargins() {
+  margins = Math.floor(Math.min(screenWidth, screenHeight) * 0.05);
 
+  // Conditional margins
+  if (screenWidth > 700) {
+    margins = Math.floor(Math.min(screenWidth, screenHeight) * 0.15);
+  }
+}
 
 
 module.exports = Globe;

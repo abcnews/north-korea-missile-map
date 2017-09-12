@@ -17,6 +17,7 @@
   /* override this inline for aspect ratio other than square */
 }
 .scaling-globe {
+  display: block; // Fix whitespace gap at bottom
   // position: absolute;
   // height: 100%;
   // width: 100%;
