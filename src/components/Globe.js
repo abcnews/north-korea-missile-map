@@ -17,7 +17,9 @@ let screenWidth = window.innerWidth,
 
 setMargins();
 
-let focusPoint = [125.7625, 39.0392]; // Pyongyang, North Korea
+let focusPoint = [125.7625, 39.0392], // Pyongyang, North Korea
+    launchCountryCode = 408,
+    launchDotRadius = 60;
 
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
@@ -26,25 +28,28 @@ const storyDataUrl = placeholder.dataset.storydata;
 
 
 function dataLoaded(error, data) {
+  const worldMap = data[0],
+        storyData = data[1];
+
+
+
   if (error) throw error;
-  // console.log(data);
-  const land = topojson.feature(data[0], data[0].objects.land),
-  countries = topojson.feature(data[0], data[0].objects.countries).features,
-  borders = topojson.mesh(data[0], data[0].objects.countries, function(a, b) { return a !== b; }),
+  const land = topojson.feature(worldMap, worldMap.objects.land),
+  countries = topojson.feature(worldMap, worldMap.objects.countries).features,
+  borders = topojson.mesh(worldMap, worldMap.objects.countries, function(a, b) { return a !== b; }),
   globe = {type: "Sphere"};
 
-  const storyData = data[1];
+  focusPoint = d3.geoCentroid(countries.find(item => item.id === launchCountryCode));
 
   // Indexing an array of objects
-  // console.log(storyData.find(item => item.id === "pyongyang"));
   function getItem(id) {
     return storyData.locations.find(item => item.id === id);
   }
 
   let currentLocationId = "pyongyang",
-      currentRangeInKms = 400,
-      previousRangeInKms = 400,
-      currentMarker = null;
+      currentRangeInKms = 0,
+      previousRangeInKms = 0,
+      currentLabel = null;
 
   // Set up a D3 projection here 
   const projection = d3.geoOrthographic()
@@ -56,7 +61,6 @@ function dataLoaded(error, data) {
     // .scale(299);
 
   initialGlobeScale = projection.scale();
-  console.log('Initial globe scale: ' + initialGlobeScale);
 
   const base = d3.select('#globe #map');
 
@@ -82,10 +86,12 @@ function dataLoaded(error, data) {
   const initialPoint = getItem('pyongyang').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
+  const geoCircle = d3.geoCircle();
+
   // Red dot to mark launch site
-  const launchPointCircle = d3.geoCircle()
-                              .center(focusPoint)
-                              .radius(kmsToRadius(70));
+  // const launchPointCircle = d3.geoCircle()
+  //                             .center(focusPoint)
+  //                             .radius(kmsToRadius(70));
 
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
@@ -93,10 +99,9 @@ function dataLoaded(error, data) {
 
 
 
-  const markerCircle = d3.geoCircle()
-                        // .center(getItem(currentMarker).longlat)
+  const labelCircle = d3.geoCircle()
                         .radius(kmsToRadius(70));
-  
+
 
 
   drawWorld();
@@ -120,10 +125,20 @@ function dataLoaded(error, data) {
     path(borders);
     context.stroke();
 
-    // Point out Pyongyang
+    // Draw Pyongyang
     context.beginPath();
-    context.fillStyle = "red";
-    path(launchPointCircle());
+    context.fillStyle = 'blue';
+    path(countries.find(item => item.id === launchCountryCode));
+    context.fill();
+
+    // Point out launch point
+    context.beginPath();
+    context.fillStyle = "#FF5733";
+    path(
+      geoCircle
+      .center(d3.geoCentroid(countries.find(item => item.id === launchCountryCode))) //focusPoint)
+      .radius(kmsToRadius(launchDotRadius))()
+    )
     context.fill();
 
     // Draw circle radius
@@ -151,10 +166,10 @@ function dataLoaded(error, data) {
     // Reset global alpha
     context.globalAlpha = 1;
 
-    // Draw a comparison marker
+    // Draw a comparison label
     context.beginPath();
-    context.fillStyle = "blue";
-    path(markerCircle());
+    context.fillStyle = "springgreen";
+    path(labelCircle());
     context.fill();
 
   } // drawWorld function
@@ -162,20 +177,19 @@ function dataLoaded(error, data) {
 
 
   mark = function (event) {
-    console.log("activated: ", event.detail.activated.config)
+    // console.log("activated: ", event.detail.activated.config)
     // console.log("deactivated: ", event.detail.deactivated ? event.detail.deactivated.config : "not defined")
 
     currentLocationId = event.detail.activated.config.id;
-    currentMarker = event.detail.activated.config.marker || null;
+    currentLabel = event.detail.activated.config.label || null;
 
-    console.log(getItem(currentMarker));
 
-    // If marker is set 
-    if (currentMarker) {
-      markerCircle.center(getItem(currentMarker).longlat)
+    // If labele is set 
+    if (currentLabel) {
+      labelCircle.center(getItem(currentLabel).longlat)
         .radius(kmsToRadius(50));
     } else {
-      markerCircle.radius(0);
+      labelCircle.radius(0);
     }
 
     currentRangeInKms = event.detail.activated.config.range;
@@ -206,7 +220,7 @@ function dataLoaded(error, data) {
           }
         }
       });
-      console.log("Current projection scale: " + projection.scale());
+      // console.log("Current projection scale: " + projection.scale());
   }; // mark function
 
   // Handle screen resizes
