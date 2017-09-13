@@ -4,12 +4,14 @@ import * as transition from 'd3-transition';
 import * as interpolate from 'd3-interpolate';
 import * as request from 'd3-request';
 import * as queue from 'd3-queue';
+import * as drag from 'd3-drag';
 
 export default Object.assign({},
   selection,
   geo,
   transition,
   interpolate,
-  request,
-  queue
+  request, 
+  queue,
+  drag
 );

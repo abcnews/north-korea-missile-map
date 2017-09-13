@@ -3,6 +3,9 @@ const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
 // const d3 = require('d3');
 import d3 from './d3-custom';
+const versor = require('../lib/versor');
+
+console.log(versor);
 
 const styles = require('./Globe.scss');
 
@@ -13,7 +16,10 @@ let screenWidth = window.innerWidth,
     screenHeight = window.innerHeight,
     initialGlobeScale,
     globeScale = 100, // Percent
-    margins;
+    margins,
+    launchCountryColor = "orangered",
+    pointFill = "white",
+    pointStroke = "black";
 
 setMargins();
 
@@ -70,6 +76,30 @@ function dataLoaded(error, data) {
     .attr('width', screenWidth)
     .attr('height', screenHeight);
 
+
+  canvas.call(d3.drag()
+    .on("start", dragstarted)
+    .on("drag", dragged));
+
+    let 
+      v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+      r0, // Projection rotation as Euler angles at start.
+      q0; // Projection rotation as versor at start.
+
+    function dragstarted() {
+      v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+      r0 = projection.rotate();
+      q0 = versor(r0);
+    }
+
+    function dragged() {
+      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+          q1 = versor.multiply(q0, versor.delta(v0, v1)),
+          r1 = versor.rotation(q1);
+      projection.rotate(r1);
+      drawWorld();
+    }
+
   const context = canvas.node().getContext('2d');
   const canvasEl = document.getElementById('globe-canvas');
   // Pixel display and High DPI monitor scaling
@@ -107,7 +137,7 @@ function dataLoaded(error, data) {
   drawWorld();
 
   // Clear and render a frame of each part of the globe
-  function drawWorld() {
+  function drawWorld(label) {
 
     // Clear the canvas ready for redraw
     context.clearRect(0, 0, screenWidth, screenHeight);
@@ -125,21 +155,24 @@ function dataLoaded(error, data) {
     path(borders);
     context.stroke();
 
-    // Draw Pyongyang
+    // Draw launch country
     context.beginPath();
-    context.fillStyle = 'blue';
+    context.fillStyle = launchCountryColor;
     path(countries.find(item => item.id === launchCountryCode));
     context.fill();
 
     // Point out launch point
     context.beginPath();
-    context.fillStyle = "#FF5733";
+    context.fillStyle = pointFill;
+    context.strokeStyle = pointStroke;
+    context.lineWidth = 1;
     path(
       geoCircle
       .center(d3.geoCentroid(countries.find(item => item.id === launchCountryCode))) //focusPoint)
       .radius(kmsToRadius(launchDotRadius))()
     )
     context.fill();
+    context.stroke();
 
     // Draw circle radius
     context.beginPath();
@@ -151,8 +184,8 @@ function dataLoaded(error, data) {
     // Draw a circle outline around the world
     context.beginPath()
     context.strokeStyle = "#111"
-    context.lineWidth = 2
-    path(globe)
+    context.lineWidth = 2;
+    path(globe);
     context.stroke();
 
     // Fill in the circle radius
@@ -166,11 +199,20 @@ function dataLoaded(error, data) {
     // Reset global alpha
     context.globalAlpha = 1;
 
-    // Draw a comparison label
-    context.beginPath();
-    context.fillStyle = "springgreen";
-    path(labelCircle());
-    context.fill();
+    if (label) {
+      // Draw a comparison label
+      context.beginPath();
+      context.fillStyle = "#eee";
+      context.strokeStyle = '#111';
+      context.lineWidth = 1;
+      path(
+          geoCircle
+          .center((getItem(label).longlat))
+          .radius(kmsToRadius(50))()
+        );
+      context.fill();
+      context.stroke();
+    }
 
   } // drawWorld function
 
@@ -185,12 +227,12 @@ function dataLoaded(error, data) {
 
 
     // If labele is set 
-    if (currentLabel) {
-      labelCircle.center(getItem(currentLabel).longlat)
-        .radius(kmsToRadius(50));
-    } else {
-      labelCircle.radius(0);
-    }
+    // if (currentLabel) {
+    //   labelCircle.center(getItem(currentLabel).longlat)
+    //     .radius(kmsToRadius(50));
+    // } else {
+    //   labelCircle.radius(0);
+    // }
 
     currentRangeInKms = event.detail.activated.config.range;
     previousRangeInKms = event.detail.deactivated ? event.detail.deactivated.config.range : 0;
@@ -216,7 +258,7 @@ function dataLoaded(error, data) {
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
             projection.scale(scaleInterpolate(time));
-            drawWorld();
+            drawWorld(currentLabel);
           }
         }
       });
