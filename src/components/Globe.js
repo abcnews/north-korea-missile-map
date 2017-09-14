@@ -2,8 +2,8 @@ const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
 // const d3 = require('d3');
-import d3 from './d3-custom';
-const versor = require('../lib/versor');
+import d3 from './d3-custom'; // Modularise D3
+const versor = require('../lib/versor'); // Canvas rotation library
 
 
 const styles = require('./Globe.scss');
@@ -79,31 +79,33 @@ function dataLoaded(error, data) {
     .attr('width', screenWidth)
     .attr('height', screenHeight);
 
-  // Click and drag disable for now because can't scroll on touch devices
-  // Detect media and disable
-  canvas.call(d3.drag()
-    // .filter(true) // Find out how to filter touch events
-    .on("start", dragstarted)
-    .on("drag", dragged));
+  if (!isMobileDevice()) {
+    // Click and drag disable for now because can't scroll on touch devices
+    // Detect media and disable
+    canvas.call(d3.drag()
+      // .filter(true) // Find out how to filter touch events
+      .on("start", dragstarted)
+      .on("drag", dragged));
 
-    let 
-      v0, // Mouse position in Cartesian coordinates at start of drag gesture.
-      r0, // Projection rotation as Euler angles at start.
-      q0; // Projection rotation as versor at start.
+      let 
+        v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+        r0, // Projection rotation as Euler angles at start.
+        q0; // Projection rotation as versor at start.
 
-    function dragstarted() {
-      v0 = versor.cartesian(projection.invert(d3.mouse(this)));
-      r0 = projection.rotate();
-      q0 = versor(r0);
-    }
+      function dragstarted() {
+        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+        r0 = projection.rotate();
+        q0 = versor(r0);
+      }
 
-    function dragged() {
-      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
-          q1 = versor.multiply(q0, versor.delta(v0, v1)),
-          r1 = versor.rotation(q1);
-      projection.rotate(r1);
-      drawWorld();
-    }
+      function dragged() {
+        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+            q1 = versor.multiply(q0, versor.delta(v0, v1)),
+            r1 = versor.rotation(q1);
+        projection.rotate(r1);
+        drawWorld();
+      }
+    } // end if (!isMobileDevice())
 
   const context = canvas.node().getContext('2d');
   const canvasEl = document.getElementById('globe-canvas');
@@ -205,40 +207,53 @@ function dataLoaded(error, data) {
     // Reset global alpha
     context.globalAlpha = 1;
 
+
+      // Please hide labels when on other side of the planet
     if (currentLabel) {
-      // Draw a comparison label dot
-      context.beginPath();
-      context.fillStyle = pointFill;
-      context.strokeStyle = pointStroke;
-      context.lineWidth = pointLineWidth;
-      // path(
-      //     geoCircle
-      //     .center(getItem(currentLabel).longlat)
-      //     .radius(kmsToRadius(pointRadius))()
-      //   );
-      context.arc(
-        projection(getItem(currentLabel).longlat)[0],
-        projection(getItem(currentLabel).longlat)[1],
-        pointRadius, 
-        0,
-        2*Math.PI);
-      context.fill();
-      context.stroke();
-
-      // Draw comparison label text
-      context.fillStyle = 'black';
-      context.font = "italic 16px Roboto";
-      context.textBaseline="middle"; 
-      context.fillText(
-        getItem(currentLabel).name,
-        projection(getItem(currentLabel).longlat)[0] + 10,
-        projection(getItem(currentLabel).longlat)[1]
+      let geoAngle = d3.geoDistance(
+          getItem(currentLabel).longlat,
+          [
+            -projection.rotate()[0],
+            -projection.rotate()[1]
+          ]
       );
+      if (geoAngle > 1.57079632679490)
+      {
+        return "0";
+      } else {
+          // Draw a comparison label dot
+          context.beginPath();
+          context.fillStyle = pointFill;
+          context.strokeStyle = pointStroke;
+          context.lineWidth = pointLineWidth;
+          // path(
+          //     geoCircle
+          //     .center(getItem(currentLabel).longlat)
+          //     .radius(kmsToRadius(pointRadius))()
+          //   );
+          context.arc(
+            projection(getItem(currentLabel).longlat)[0],
+            projection(getItem(currentLabel).longlat)[1],
+            pointRadius, 
+            0, // Starting point on arc
+            2*Math.PI); // Go around the whole circle
+          context.fill();
+          context.stroke();
 
+          // Draw comparison label text
+          context.fillStyle = 'black';
+          context.font = "italic 16px Roboto";
+          context.textBaseline="middle"; 
+          context.fillText(
+            getItem(currentLabel).name,
+            projection(getItem(currentLabel).longlat)[0] + 10,
+            projection(getItem(currentLabel).longlat)[1]
+          );
+        return "1.0";
+      }
+    } // end if (currentLabel)
 
-    }
-
-  } // drawWorld function
+  } // end drawWorld function
 
 
 
@@ -353,6 +368,11 @@ function setMargins() {
     margins = Math.floor(Math.min(screenWidth, screenHeight) * 0.15);
   }
 }
+
+
+function isMobileDevice() {
+  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+};
 
 
 module.exports = Globe;
