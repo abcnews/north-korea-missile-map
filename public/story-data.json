@@ -18,5 +18,90 @@
     "id": "guam",
     "name": "Guam",
     "longlat": [144.793732, 13.444304]
+  },
+  {
+    "id": "osaka",
+    "name": "Osaka",
+    "longlat": [135.502165, 34.693738]
+  },
+  {
+    "id": "skorea",
+    "name": "South Korea",
+    "longlat": [127.766922, 35.907757]
+  },
+  {
+    "id": "thaad",
+    "name": "THAAD",
+    "longlat": [128.282974, 35.919008]
+  },
+  {
+    "id": "tokyo",
+    "name": "Tokyo",
+    "longlat": [139.691706, 35.689487]
+  },
+  {
+    "id": "sinpo",
+    "name": "Sinpo",
+    "longlat": [128.183947, 40.036845]
+  },
+  {
+    "id": "pacific",
+    "name": "Pacific",
+    "longlat": [130.869141, 3.464074]
+  },
+  {
+    "id": "siberia",
+    "name": "Siberia",
+    "longlat": [99.196656, 61.013710]
+  },
+  {
+    "id": "seasia",
+    "name": "South-east Asia",
+    "longlat": [101.513672, 16.757208]
+  },
+  {
+    "id": "perth",
+    "name": "Perth",
+    "longlat": [115.860457, -31.950527]
+  },
+  {
+    "id": "australia",
+    "name": "Australia",
+    "longlat": [133.775136, -25.274398]
+  },
+  {
+    "id": "losangeles",
+    "name": "Los Angeles",
+    "longlat": [-118.243685, 34.052234]
+  },
+  {
+    "id": "europe",
+    "name": "Europe",
+    "longlat": [15.255119, 54.525961]
+  },
+  {
+    "id": "auckland",
+    "name": "Auckland",
+    "longlat": [174.763332, -36.848460]
+  },
+  {
+    "id": "newyork",
+    "name": "New York",
+    "longlat": [-74.005941, 40.712784]
+  },
+  {
+    "id": "washington",
+    "name": "Washington DC",
+    "longlat": [-77.036871, 38.907192]
+  },
+  {
+    "id": "southamerica",
+    "name": "South America",
+    "longlat": [-55.491477, -8.783195]
+  },
+  {
+    "id": "mardelplata",
+    "name": "Mar del Plata",
+    "longlat": [-57.542611, -38.005477]
   }
 ]}

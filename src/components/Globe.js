@@ -5,7 +5,6 @@ const canvasDpiScaler = require('canvas-dpi-scaler');
 import d3 from './d3-custom';
 const versor = require('../lib/versor');
 
-console.log(versor);
 
 const styles = require('./Globe.scss');
 
@@ -18,8 +17,11 @@ let screenWidth = window.innerWidth,
     globeScale = 100, // Percent
     margins,
     launchCountryColor = "orangered",
-    pointFill = "white",
-    pointStroke = "black";
+    pointFill = "orangered",
+    pointStroke = "white",
+    pointRadius = 6,
+    pointLineWidth = 0.5;
+
 
 setMargins();
 
@@ -52,6 +54,7 @@ function dataLoaded(error, data) {
     return storyData.locations.find(item => item.id === id);
   }
 
+  // Set original first marker values manually for now
   let currentLocationId = "pyongyang",
       currentRangeInKms = 0,
       previousRangeInKms = 0,
@@ -76,8 +79,10 @@ function dataLoaded(error, data) {
     .attr('width', screenWidth)
     .attr('height', screenHeight);
 
-
+  // Click and drag disable for now because can't scroll on touch devices
+  // Detect media and disable
   canvas.call(d3.drag()
+    // .filter(true) // Find out how to filter touch events
     .on("start", dragstarted)
     .on("drag", dragged));
 
@@ -102,6 +107,7 @@ function dataLoaded(error, data) {
 
   const context = canvas.node().getContext('2d');
   const canvasEl = document.getElementById('globe-canvas');
+
   // Pixel display and High DPI monitor scaling
   canvasDpiScaler(canvasEl, context);
 
@@ -129,8 +135,8 @@ function dataLoaded(error, data) {
 
 
 
-  const labelCircle = d3.geoCircle()
-                        .radius(kmsToRadius(70));
+  // const labelCircle = d3.geoCircle()
+  //                       .radius(kmsToRadius(70));
 
 
 
@@ -162,17 +168,17 @@ function dataLoaded(error, data) {
     context.fill();
 
     // Point out launch point
-    context.beginPath();
-    context.fillStyle = pointFill;
-    context.strokeStyle = pointStroke;
-    context.lineWidth = 1;
-    path(
-      geoCircle
-      .center(d3.geoCentroid(countries.find(item => item.id === launchCountryCode))) //focusPoint)
-      .radius(kmsToRadius(launchDotRadius))()
-    )
-    context.fill();
-    context.stroke();
+    // context.beginPath();
+    // context.fillStyle = pointFill;
+    // context.strokeStyle = pointStroke;
+    // context.lineWidth = 1;
+    // path(
+    //   geoCircle
+    //   .center(d3.geoCentroid(countries.find(item => item.id === launchCountryCode))) //focusPoint)
+    //   .radius(kmsToRadius(launchDotRadius))()
+    // )
+    // context.fill();
+    // context.stroke();
 
     // Draw circle radius
     context.beginPath();
@@ -199,19 +205,37 @@ function dataLoaded(error, data) {
     // Reset global alpha
     context.globalAlpha = 1;
 
-    if (label) {
-      // Draw a comparison label
+    if (currentLabel) {
+      // Draw a comparison label dot
       context.beginPath();
-      context.fillStyle = "#eee";
-      context.strokeStyle = '#111';
-      context.lineWidth = 1;
-      path(
-          geoCircle
-          .center((getItem(label).longlat))
-          .radius(kmsToRadius(50))()
-        );
+      context.fillStyle = pointFill;
+      context.strokeStyle = pointStroke;
+      context.lineWidth = pointLineWidth;
+      // path(
+      //     geoCircle
+      //     .center(getItem(currentLabel).longlat)
+      //     .radius(kmsToRadius(pointRadius))()
+      //   );
+      context.arc(
+        projection(getItem(currentLabel).longlat)[0],
+        projection(getItem(currentLabel).longlat)[1],
+        pointRadius, 
+        0,
+        2*Math.PI);
       context.fill();
       context.stroke();
+
+      // Draw comparison label text
+      context.fillStyle = 'black';
+      context.font = "italic 16px Roboto";
+      context.textBaseline="middle"; 
+      context.fillText(
+        getItem(currentLabel).name,
+        projection(getItem(currentLabel).longlat)[0] + 10,
+        projection(getItem(currentLabel).longlat)[1]
+      );
+
+
     }
 
   } // drawWorld function
@@ -226,14 +250,6 @@ function dataLoaded(error, data) {
     currentLabel = event.detail.activated.config.label || null;
 
 
-    // If labele is set 
-    // if (currentLabel) {
-    //   labelCircle.center(getItem(currentLabel).longlat)
-    //     .radius(kmsToRadius(50));
-    // } else {
-    //   labelCircle.radius(0);
-    // }
-
     currentRangeInKms = event.detail.activated.config.range;
     previousRangeInKms = event.detail.deactivated ? event.detail.deactivated.config.range : 0;
 
@@ -245,7 +261,7 @@ function dataLoaded(error, data) {
       .delay(0)
       .duration(1200)
       .tween("rotate", function() {
-        var p = getItem(currentLocationId).longlat;
+        var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
           let rotationInterpolate = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
           let radiusInterpolate = d3.interpolate(
@@ -258,7 +274,7 @@ function dataLoaded(error, data) {
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
             projection.scale(scaleInterpolate(time));
-            drawWorld(currentLabel);
+            drawWorld();
           }
         }
       });
