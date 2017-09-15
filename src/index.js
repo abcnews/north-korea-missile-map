@@ -9,12 +9,12 @@ if (stage) {
     detail: stage.__SCROLLYTELLER__
   });
 } else {
-  console.log('waiting for the stage');
+  // console.log('waiting for the stage');
 
   document.arrive(".scrollyteller-stage", function() {
-    console.log('Stage has arrived...');
+    // console.log('Stage has arrived...');
     stage = document.querySelector('.scrollyteller-stage');
-    console.log('Initialising interactive...');
+    // console.log('Initialising interactive...');
     init({
       target: stage,
       detail: stage.__SCROLLYTELLER__
@@ -26,8 +26,8 @@ if (stage) {
 
 
 function init(ev) {
-  console.log(ev.target); // the stage element
-  console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
+  // console.log(ev.target); // the stage element
+  // console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
 
   const App = require('./components/App');
   render(<App />, stage, stage.firstChild);

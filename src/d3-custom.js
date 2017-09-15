@@ -5,6 +5,7 @@ import * as interpolate from 'd3-interpolate';
 import * as request from 'd3-request';
 import * as queue from 'd3-queue';
 import * as drag from 'd3-drag';
+import * as scale from 'd3-scale';
 
 export default Object.assign({},
   selection,
@@ -13,5 +14,6 @@ export default Object.assign({},
   interpolate,
   request, 
   queue,
-  drag
+  drag,
+  scale
 );

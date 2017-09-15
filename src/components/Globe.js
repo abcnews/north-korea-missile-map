@@ -2,7 +2,7 @@ const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
 // const d3 = require('d3');
-import d3 from './d3-custom'; // Modularise D3
+import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
 
@@ -47,6 +47,7 @@ function dataLoaded(error, data) {
   borders = topojson.mesh(worldMap, worldMap.objects.countries, function(a, b) { return a !== b; }),
   globe = {type: "Sphere"};
 
+  // Set launch/focus point to the centre of North Korea
   focusPoint = d3.geoCentroid(countries.find(item => item.id === launchCountryCode));
 
   // Indexing an array of objects
@@ -79,6 +80,23 @@ function dataLoaded(error, data) {
     .attr('width', screenWidth)
     .attr('height', screenHeight);
 
+
+  const context = canvas.node().getContext('2d');
+  const canvasEl = document.getElementById('globe-canvas');
+
+  // Pixel display and High DPI monitor scaling
+  canvasDpiScaler(canvasEl, context);
+
+
+
+  // var obj = document.getElementById('id');
+  // canvasEl.addEventListener('touchmove', function(event) {
+  //   // If there's exactly one finger inside this element
+  //   if (event.targetTouches.length == 2) {
+  //     // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
+  //   }
+  // }, false);
+
   if (!isMobileDevice()) {
     // Click and drag disable for now because can't scroll on touch devices
     // Detect media and disable
@@ -107,13 +125,7 @@ function dataLoaded(error, data) {
       }
     } // end if (!isMobileDevice())
 
-  const context = canvas.node().getContext('2d');
-  const canvasEl = document.getElementById('globe-canvas');
-
-  // Pixel display and High DPI monitor scaling
-  canvasDpiScaler(canvasEl, context);
-
-
+  // Build a path generator
   const path = d3.geoPath()
     .projection(projection)
     .context(context);
@@ -219,7 +231,7 @@ function dataLoaded(error, data) {
       );
       if (geoAngle > 1.57079632679490)
       {
-        return "0";
+        // Do nothing
       } else {
           // Draw a comparison label dot
           context.beginPath();
@@ -249,7 +261,6 @@ function dataLoaded(error, data) {
             projection(getItem(currentLabel).longlat)[0] + 10,
             projection(getItem(currentLabel).longlat)[1]
           );
-        return "1.0";
       }
     } // end if (currentLabel)
 
@@ -276,19 +287,29 @@ function dataLoaded(error, data) {
       .delay(0)
       .duration(1200)
       .tween("rotate", function() {
+        if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
-          let rotationInterpolate = d3.interpolate(projection.rotate(), [ -p[0], -p[1] ]);
+          let currentRotation = projection.rotate();
+          let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1] ]);
           let radiusInterpolate = d3.interpolate(
             kmsToRadius(previousRangeInKms), 
             kmsToRadius(currentRangeInKms)
           );
           let scaleInterpolate = d3.interpolate(projection.scale(),
                                                 newGlobeScale);
+                                                
+          let zoomInterpolate = d3.interpolateZoom(
+            [currentRotation[0], currentRotation[1], projection.scale()],
+            [-p[0],-p[1], newGlobeScale]
+          );
+
           return function (time) {
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
-            projection.scale(scaleInterpolate(time));
+            // projection.scale(scaleInterpolate(time));
+            projection.scale(zoomInterpolate(time)[2]);
+            console.log(zoomInterpolate(time));
             drawWorld();
           }
         }
