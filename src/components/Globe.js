@@ -20,7 +20,8 @@ let screenWidth = window.innerWidth,
     pointFill = "orangered",
     pointStroke = "white",
     pointRadius = 6,
-    pointLineWidth = 0.5;
+    pointLineWidth = 0.5,
+    transitionDuration = 1750;
 
 
 setMargins();
@@ -35,13 +36,17 @@ const geojsonUrl = placeholder.dataset.geojson;
 const storyDataUrl = placeholder.dataset.storydata;
 
 
+var zoomScale = d3.scaleLinear()
+.domain([-5, 9])
+.range([0, 50]);
+
+
 function dataLoaded(error, data) {
+  if (error) throw error;
+
   const worldMap = data[0],
         storyData = data[1];
 
-
-
-  if (error) throw error;
   const land = topojson.feature(worldMap, worldMap.objects.land),
   countries = topojson.feature(worldMap, worldMap.objects.countries).features,
   borders = topojson.mesh(worldMap, worldMap.objects.countries, function(a, b) { return a !== b; }),
@@ -146,11 +151,6 @@ function dataLoaded(error, data) {
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
-
-
-
-  // const labelCircle = d3.geoCircle()
-  //                       .radius(kmsToRadius(70));
 
 
 
@@ -269,9 +269,6 @@ function dataLoaded(error, data) {
 
 
   mark = function (event) {
-    // console.log("activated: ", event.detail.activated.config)
-    // console.log("deactivated: ", event.detail.deactivated ? event.detail.deactivated.config : "not defined")
-
     currentLocationId = event.detail.activated.config.id;
     currentLabel = event.detail.activated.config.label || null;
 
@@ -281,40 +278,111 @@ function dataLoaded(error, data) {
 
     globeScale = event.detail.activated.config.scale || 100;
 
+    let shouldZoomOut = event.detail.activated.config.zoom || false;
+
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
-    d3.transition()
+    let currentRotation = projection.rotate();
+
+    const dummyRotate = {},
+          dummyZoom = {};
+
+    d3.select(dummyRotate).transition()
       .delay(0)
-      .duration(1200)
+      .duration(transitionDuration)
       .tween("rotate", function() {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
-          let currentRotation = projection.rotate();
+          
           let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1] ]);
           let radiusInterpolate = d3.interpolate(
             kmsToRadius(previousRangeInKms), 
             kmsToRadius(currentRangeInKms)
           );
-          let scaleInterpolate = d3.interpolate(projection.scale(),
-                                                newGlobeScale);
-                                                
-          let zoomInterpolate = d3.interpolateZoom(
-            [currentRotation[0], currentRotation[1], projection.scale()],
-            [-p[0],-p[1], newGlobeScale]
-          );
 
           return function (time) {
+
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
-            // projection.scale(scaleInterpolate(time));
-            projection.scale(zoomInterpolate(time)[2]);
-            console.log(zoomInterpolate(time));
+
             drawWorld();
           }
         }
       });
-      // console.log("Current projection scale: " + projection.scale());
+
+
+    let distanceBetweenRotation = d3.geoDistance(
+        getItem(currentLocationId).longlat,
+        [
+          -projection.rotate()[0],
+          -projection.rotate()[1]
+        ]
+      );
+      console.log(distanceBetweenRotation);
+
+    shouldZoomOut ? zoomOutFirst() : zoomDirect();
+
+    function zoomDirect() {
+      d3.select(dummyZoom).transition()
+      .duration(transitionDuration)
+      .tween("zoom", function() {
+        if (!currentLocationId) return;
+        var p = getItem(currentLocationId).longlat;
+        if (p) {
+          
+          let scaleInterpolate = d3.interpolate(projection.scale(),
+                                   newGlobeScale);
+
+          return function (time) {
+          
+            projection.scale(scaleInterpolate(time));
+            
+            drawWorld();
+          }
+        }
+      })
+    }
+
+    function zoomOutFirst() {
+      d3.select(dummyZoom).transition()
+        .duration(transitionDuration / 2)
+        .tween("zoom", function() {
+          if (!currentLocationId) return;
+          var p = getItem(currentLocationId).longlat;
+          if (p) {
+            
+            let scaleInterpolate = d3.interpolate(projection.scale(),
+              initialGlobeScale);
+
+            return function (time) {
+            
+              projection.scale(scaleInterpolate(time));
+              
+              drawWorld();
+            }
+          }
+        })
+        .transition()
+        .tween("zoom", function() {
+          if (!currentLocationId) return;
+          var p = getItem(currentLocationId).longlat;
+          if (p) {
+            
+            let scaleInterpolate = d3.interpolate(projection.scale(),
+                                                  newGlobeScale);
+
+            return function (time) {
+            
+              projection.scale(scaleInterpolate(time));
+              drawWorld();
+            }
+          }
+        });
+    }
+
+        
+      
   }; // mark function
 
   // Handle screen resizes
@@ -322,7 +390,6 @@ function dataLoaded(error, data) {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
 
-    // globeScale = 100;
 
     setMargins();
 
