@@ -72,7 +72,7 @@
   {
     "id": "losangeles",
     "name": "Los Angeles",
-    "longlat": [-118.243685, 34.052234]
+    "longlat": [241.756315, 34.052234]
   },
   {
     "id": "europe",
@@ -87,12 +87,12 @@
   {
     "id": "newyork",
     "name": "New York",
-    "longlat": [-74.005941, 40.712784]
+    "longlat": [285.994059, 40.712784]
   },
   {
     "id": "washington",
     "name": "Washington DC",
-    "longlat": [-77.036871, 38.907192]
+    "longlat": [282.963129, 38.907192]
   },
   {
     "id": "southamerica",

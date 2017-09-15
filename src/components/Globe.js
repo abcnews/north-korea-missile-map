@@ -64,7 +64,7 @@ function dataLoaded(error, data) {
   let currentLocationId = "pyongyang",
       currentRangeInKms = 0,
       previousRangeInKms = 0,
-      currentLabel = null;
+      currentLabels = null;
 
   // Set up a D3 projection here 
   const projection = d3.geoOrthographic()
@@ -221,9 +221,14 @@ function dataLoaded(error, data) {
 
 
       // Please hide labels when on other side of the planet
-    if (currentLabel) {
-      let geoAngle = d3.geoDistance(
-          getItem(currentLabel).longlat,
+    if (currentLabels && currentLabels[0]) {
+      drawLabels();
+    } // end if (currentLabel)
+
+    function drawLabels() {
+      currentLabels.forEach(function(element) {
+        let geoAngle = d3.geoDistance(
+          getItem(element).longlat,
           [
             -projection.rotate()[0],
             -projection.rotate()[1]
@@ -244,8 +249,8 @@ function dataLoaded(error, data) {
           //     .radius(kmsToRadius(pointRadius))()
           //   );
           context.arc(
-            projection(getItem(currentLabel).longlat)[0],
-            projection(getItem(currentLabel).longlat)[1],
+            projection(getItem(element).longlat)[0],
+            projection(getItem(element).longlat)[1],
             pointRadius, 
             0, // Starting point on arc
             2*Math.PI); // Go around the whole circle
@@ -257,12 +262,13 @@ function dataLoaded(error, data) {
           context.font = "italic 16px Roboto";
           context.textBaseline="middle"; 
           context.fillText(
-            getItem(currentLabel).name,
-            projection(getItem(currentLabel).longlat)[0] + 10,
-            projection(getItem(currentLabel).longlat)[1]
+            getItem(element).name,
+            projection(getItem(element).longlat)[0] + 10,
+            projection(getItem(element).longlat)[1]
           );
-      }
-    } // end if (currentLabel)
+        }
+      }, this);
+    }
 
   } // end drawWorld function
 
@@ -270,7 +276,17 @@ function dataLoaded(error, data) {
 
   mark = function (event) {
     currentLocationId = event.detail.activated.config.id;
-    currentLabel = event.detail.activated.config.label || null;
+
+    // If more than one LABEL assign directly as array
+    if (event.detail.activated.config.label instanceof Array) {
+      currentLabels = event.detail.activated.config.label;
+    } else {
+      currentLabels = [event.detail.activated.config.label];
+    }
+
+    // currentLabels = [event.detail.activated.config.label];
+
+    console.log(currentLabels);
 
 
     currentRangeInKms = event.detail.activated.config.range;
@@ -278,7 +294,13 @@ function dataLoaded(error, data) {
 
     globeScale = event.detail.activated.config.scale || 100;
 
-    let shouldZoomOut = event.detail.activated.config.zoom || false;
+    let shouldZoomOut = false;
+    try {
+      if (event.detail.activated.config.zoom && event.detail.deactivated.config.zoom) {
+        shouldZoomOut = true;
+      } 
+    } catch (e) {}
+    
 
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
@@ -312,14 +334,14 @@ function dataLoaded(error, data) {
       });
 
 
-    let distanceBetweenRotation = d3.geoDistance(
-        getItem(currentLocationId).longlat,
-        [
-          -projection.rotate()[0],
-          -projection.rotate()[1]
-        ]
-      );
-      console.log(distanceBetweenRotation);
+    // let distanceBetweenRotation = d3.geoDistance(
+    //     getItem(currentLocationId).longlat,
+    //     [
+    //       -projection.rotate()[0],
+    //       -projection.rotate()[1]
+    //     ]
+    //   );
+    //   console.log(distanceBetweenRotation);
 
     shouldZoomOut ? zoomOutFirst() : zoomDirect();
 
@@ -461,6 +483,15 @@ function setMargins() {
 function isMobileDevice() {
   return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 };
+
+
+function isInt(value) {
+  if (isNaN(value)) {
+    return false;
+  }
+  var x = parseFloat(value);
+  return (x | 0) === x;
+}
 
 
 module.exports = Globe;
