@@ -16,11 +16,11 @@ let screenWidth = window.innerWidth,
     initialGlobeScale,
     globeScale = 100, // Percent
     margins,
-    launchCountryColor = "orangered",
-    pointFill = "orangered",
+    launchCountryColor = "#21849B",
+    pointFill = "#FF6100",
     pointStroke = "white",
     pointRadius = 6,
-    pointLineWidth = 0.5,
+    pointLineWidth = 2,
     transitionDuration = 1750;
 
 
@@ -49,7 +49,7 @@ function dataLoaded(error, data) {
 
   const land = topojson.feature(worldMap, worldMap.objects.land),
   countries = topojson.feature(worldMap, worldMap.objects.countries).features,
-  borders = topojson.mesh(worldMap, worldMap.objects.countries, function(a, b) { return a !== b; }),
+  borders = topojson.mesh(worldMap, worldMap.objects.countries, /* function(a, b) { return a !== b; } */),
   globe = {type: "Sphere"};
 
   // Set launch/focus point to the centre of North Korea
@@ -162,15 +162,21 @@ function dataLoaded(error, data) {
     // Clear the canvas ready for redraw
     context.clearRect(0, 0, screenWidth, screenHeight);
 
+    // Draw the water
+    context.beginPath()
+    context.fillStyle = '#E3F4F9';
+    path(globe);
+    context.fill();
+
     // Draw landmass
     context.beginPath();
-    context.fillStyle = 'grey';
+    context.fillStyle = 'white';
     path(land);
     context.fill();
 
     // Draw outline of countries
     context.beginPath();
-    context.strokeStyle = "#ccc";
+    context.strokeStyle = "#1D3C43";
     context.lineWidth = 1;
     path(borders);
     context.stroke();
@@ -203,7 +209,7 @@ function dataLoaded(error, data) {
 
     // Draw a circle outline around the world
     context.beginPath()
-    context.strokeStyle = "#111"
+    context.strokeStyle = "#1D3C43"
     context.lineWidth = 2;
     path(globe);
     context.stroke();
