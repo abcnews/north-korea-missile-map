@@ -17,6 +17,8 @@
   "dependencies": {
     "arrive": "^2.4.1",
     "canvas-dpi-scaler": "0.0.3",
+    "d3-array": "^1.2.0",
+    "d3-color": "^1.0.3",
     "d3-drag": "^1.1.1",
     "d3-geo": "^1.6.4",
     "d3-interpolate": "^1.1.5",

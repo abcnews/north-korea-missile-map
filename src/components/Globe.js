@@ -21,7 +21,7 @@ let screenWidth = window.innerWidth,
     pointStroke = "white",
     pointRadius = 6,
     pointLineWidth = 2,
-    transitionDuration = 1750;
+    transitionDuration = 1300;
 
 
 setMargins();
@@ -49,7 +49,7 @@ function dataLoaded(error, data) {
 
   const land = topojson.feature(worldMap, worldMap.objects.land),
   countries = topojson.feature(worldMap, worldMap.objects.countries).features,
-  borders = topojson.mesh(worldMap, worldMap.objects.countries, /* function(a, b) { return a !== b; } */),
+  borders = topojson.mesh(worldMap, worldMap.objects.countries,  function(a, b) { return a !== b; } ),
   globe = {type: "Sphere"};
 
   // Set launch/focus point to the centre of North Korea
@@ -152,6 +152,10 @@ function dataLoaded(error, data) {
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
 
+  // Todo: Change back to rgb color later
+  var l = 65
+  var a = -30 
+  var b = 0
 
 
   drawWorld();
@@ -160,6 +164,8 @@ function dataLoaded(error, data) {
   function drawWorld(label) {
 
     // Clear the canvas ready for redraw
+    // context.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    // context.fillRect(0, 0, screenWidth, screenHeight); // Trippy clear trails just testing
     context.clearRect(0, 0, screenWidth, screenHeight);
 
     // Draw the water
@@ -170,7 +176,7 @@ function dataLoaded(error, data) {
 
     // Draw landmass
     context.beginPath();
-    context.fillStyle = 'white';
+    context.fillStyle = '#666';
     path(land);
     context.fill();
 
@@ -202,7 +208,7 @@ function dataLoaded(error, data) {
 
     // Draw circle radius
     context.beginPath();
-    context.strokeStyle = "red";
+    context.strokeStyle = "#FF6100";
     context.lineWidth = 1.5;
     path(rangeCircle());
     context.stroke();
@@ -216,11 +222,14 @@ function dataLoaded(error, data) {
 
     // Fill in the circle radius
     context.beginPath();
-    context.globalAlpha = 0.07; // Maybe better Edge support
-    // context.fillStyle = 'rgba(255, 0, 0, 0.07';
-    context.fillStyle = 'red';
+    context.globalAlpha = 1; //0.07; // Maybe better Edge support
+    context.fillStyle = 'rgba(255, 0, 0, 0.07';
+    context.fillStyle = d3.lab(l,a,b, 0.3);
+
     path(rangeCircle());
     context.fill();
+
+
 
     // Reset global alpha
     context.globalAlpha = 1;
@@ -291,8 +300,6 @@ function dataLoaded(error, data) {
     }
 
     // currentLabels = [event.detail.activated.config.label];
-
-    console.log(currentLabels);
 
 
     currentRangeInKms = event.detail.activated.config.range;
@@ -374,7 +381,7 @@ function dataLoaded(error, data) {
 
     function zoomOutFirst() {
       d3.select(dummyZoom).transition()
-        .duration(transitionDuration / 2)
+        .duration(transitionDuration / 2 + 300)
         .tween("zoom", function() {
           if (!currentLocationId) return;
           var p = getItem(currentLocationId).longlat;
