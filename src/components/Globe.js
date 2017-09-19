@@ -158,10 +158,11 @@ function dataLoaded(error, data) {
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
 
-  // Todo: Change back to rgb color later
-  var l = 65
-  var a = -30 
-  var b = 0
+  // Preload ABC Sans - maybe only works on desktop
+  context.beginPath();
+  context.fillStyle = 'rgba(0,0,0,1.0)';
+  context.font = `700 18px ABCSans`;
+  context.fillText('Osaka Seoul ' + String.fromCharCode(8202), 100, 100);
 
 
   drawWorld();
@@ -173,6 +174,8 @@ function dataLoaded(error, data) {
     // context.fillStyle = 'rgba(255, 255, 255, 0.2)';
     // context.fillRect(0, 0, screenWidth, screenHeight); // Trippy clear trails just testing
     context.clearRect(0, 0, screenWidth, screenHeight);
+
+    
 
     // Draw the water
     context.beginPath();
@@ -190,11 +193,11 @@ function dataLoaded(error, data) {
     context.stroke();
 
     // Draw outline of countries
-    // context.beginPath();
-    // context.strokeStyle = "#1D3C43";
-    // context.lineWidth = 1;
-    // path(borders);
-    // context.stroke();
+    context.beginPath();
+    context.strokeStyle = "#1D3C43";
+    context.lineWidth = 1;
+    path(borders);
+    context.stroke();
 
     // Draw launch country
     context.beginPath();
@@ -231,9 +234,9 @@ function dataLoaded(error, data) {
 
     // Fill in the circle radius
     context.beginPath();
-    context.globalAlpha = 1; //0.07; // Maybe better Edge support
-    context.fillStyle = 'rgba(255, 0, 0, 0.07';
-    context.fillStyle = d3.lab(l,a,b, 0.3);
+    context.globalAlpha = 0.3; // Maybe better Edge support
+    context.fillStyle = 'aquamarine';
+    // context.fillStyle = d3.lab(l,a,b, 0.3);
 
     path(rangeCircle());
     context.fill();
@@ -285,12 +288,15 @@ function dataLoaded(error, data) {
 
           // Draw comparison label text
 
-          let labelName = getItem(element).name.split("").join(String.fromCharCode(8202));
+          let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
           let labelWidth = context.measureText(labelName).width;
-          let fontSize = 18;
+          let fontSize = screenWidth < 700 ? 16 : 18;
           let labelMargins = 18;
+          let markerLongitude = projection(getItem(element).longlat)[0];
+          let markerLatitude = projection(getItem(element).longlat)[1];
 
           let labelOffset = 30;
+          let pointerOffset = 12;
 
           context.font = `700 ${fontSize}px ABCSans`;
           context.textBaseline = "middle";
@@ -300,34 +306,63 @@ function dataLoaded(error, data) {
             // Alternate labels left and right align
             if (i % 2 === 0) {
 
+              // context.beginPath();
+              // context.rect( 
+              //   markerLongitude + labelOffset,
+              //   markerLatitude - fontSize,
+              //   labelWidth + labelMargins * 2,
+              //   fontSize * 2,
+              // );
+              // context.fillStyle = 'black';
+              // context.fill();
+
+              // Draw the background and pointer
               context.beginPath();
-              context.rect( 
-                projection(getItem(element).longlat)[0] + labelOffset,
-                projection(getItem(element).longlat)[1] - fontSize,
-                labelWidth + labelMargins * 2,
-                fontSize * 2,
-              );
+              context.moveTo(markerLongitude + labelOffset, markerLatitude - fontSize);
+              context.lineTo(markerLongitude + labelOffset + labelWidth + labelMargins * 2,
+                markerLatitude - fontSize);
+              context.lineTo(markerLongitude + labelOffset + labelWidth + labelMargins * 2,
+                markerLatitude + fontSize);
+              context.lineTo(markerLongitude + labelOffset, markerLatitude + fontSize);
+              context.lineTo(markerLongitude + pointerOffset, markerLatitude);
+              context.closePath();
               context.fillStyle = 'black';
               context.fill();
 
+              // Draw the text
               context.fillStyle = 'white';
               context.textAlign = "left";
               context.fillText(
                 labelName,
-                projection(getItem(element).longlat)[0] + labelOffset + labelMargins,
-                projection(getItem(element).longlat)[1]
+                markerLongitude + labelOffset + labelMargins,
+                markerLatitude
               );
 
 
             } else {
+              // Right aligned text pointers
 
+              // context.beginPath();
+              // context.rect( 
+              //   projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
+              //   projection(getItem(element).longlat)[1] - fontSize,
+              //   labelWidth + labelMargins * 2,
+              //   fontSize * 2,
+              // );
+              // context.fillStyle = 'black';
+              // context.fill();
+
+              // Draw the background and pointer
               context.beginPath();
-              context.rect( 
-                projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
-                projection(getItem(element).longlat)[1] - fontSize,
-                labelWidth + labelMargins * 2,
-                fontSize * 2,
-              );
+              context.moveTo(markerLongitude - labelOffset - labelWidth - labelMargins * 2,
+                markerLatitude - fontSize);
+              context.lineTo(markerLongitude - labelOffset,
+                markerLatitude - fontSize);
+              context.lineTo(markerLongitude - pointerOffset, markerLatitude);
+              context.lineTo(markerLongitude - labelOffset, markerLatitude + fontSize);
+              context.lineTo(markerLongitude - labelOffset - labelWidth - labelMargins * 2, 
+                markerLatitude + fontSize);
+              context.closePath();
               context.fillStyle = 'black';
               context.fill();
 
