@@ -277,16 +277,31 @@ function dataLoaded(error, data) {
           context.stroke();
 
           // Draw comparison label text
-          context.fillStyle = 'black';
-          context.font = "italic 16px Roboto";
+          context.fillStyle = 'white';
+          context.font = '700 18px ABCSans';
           context.textBaseline = "middle";
+
+          let labelWidth = context.measureText(getItem(element).name).width;
+          let labelName = getItem(element).name;
 
           // Alternate labels left and right align
           if (i % 2) {
+
+            context.beginPath();
+            context.rect( 
+              projection(getItem(element).longlat)[0] - labelWidth - 40 - (labelName.length * 2), 
+              projection(getItem(element).longlat)[1] - 18,
+              labelWidth + 20 + (labelName.length * 2),
+              36,
+            );
+            context.fillStyle = 'black';
+            context.fill();
+
             context.textAlign = "right";
+            context.fillStyle = 'white';
             context.fillText(
-              getItem(element).name,
-              projection(getItem(element).longlat)[0] - 10,
+              labelName.split("").join(String.fromCharCode(8202)),
+              projection(getItem(element).longlat)[0] - 33,
               projection(getItem(element).longlat)[1]
             );
           } else {
