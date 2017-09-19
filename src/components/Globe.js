@@ -21,7 +21,13 @@ let screenWidth = window.innerWidth,
     pointStroke = "white",
     pointRadius = 6,
     pointLineWidth = 2,
-    transitionDuration = 1300;
+    transitionDuration = 1300,
+    isLandscape = true;
+    
+    if(window.innerHeight > window.innerWidth){
+      isLandscape = !isLandscape;
+    }
+
 
 
 setMargins();
@@ -178,7 +184,7 @@ function dataLoaded(error, data) {
     context.beginPath();
     context.strokeStyle = '#1D3C43';
     context.fillStyle = 'white';
-    context.lineWidth = 1.6;
+    context.lineWidth = screenWidth < 700 ? 1.1 : 1.6;
     path(land);
     context.fill();
     context.stroke();
@@ -209,7 +215,7 @@ function dataLoaded(error, data) {
     // context.fill();
     // context.stroke();
 
-    // Draw circle radius
+    // Draw circle launch radius
     context.beginPath();
     context.strokeStyle = "#FF6100";
     context.lineWidth = 1.6;
@@ -275,10 +281,9 @@ function dataLoaded(error, data) {
             2*Math.PI); // Go around the whole circle
           context.fill();
           context.stroke();
+          
 
           // Draw comparison label text
-          
-          
 
           let labelName = getItem(element).name.split("").join(String.fromCharCode(8202));
           let labelWidth = context.measureText(labelName).width;
@@ -291,50 +296,97 @@ function dataLoaded(error, data) {
           context.textBaseline = "middle";
           
 
-          // Alternate labels left and right align
-          if (!i % 2) {
+          if (isLandscape) {
+            // Alternate labels left and right align
+            if (!i % 2) {
 
-            context.beginPath();
-            context.rect( 
-              projection(getItem(element).longlat)[0] + labelOffset,
-              projection(getItem(element).longlat)[1] - fontSize,
-              labelWidth + labelMargins * 2,
-              fontSize * 2,
-            );
-            context.fillStyle = 'black';
-            context.fill();
+              context.beginPath();
+              context.rect( 
+                projection(getItem(element).longlat)[0] + labelOffset,
+                projection(getItem(element).longlat)[1] - fontSize,
+                labelWidth + labelMargins * 2,
+                fontSize * 2,
+              );
+              context.fillStyle = 'black';
+              context.fill();
 
-            context.fillStyle = 'white';
-            context.textAlign = "left";
-            context.fillText(
-              labelName,
-              projection(getItem(element).longlat)[0] + labelOffset + labelMargins,
-              projection(getItem(element).longlat)[1]
-            );
-
-
-          } else {
-
-            context.beginPath();
-            context.rect( 
-              projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
-              projection(getItem(element).longlat)[1] - fontSize,
-              labelWidth + labelMargins * 2,
-              fontSize * 2,
-            );
-            context.fillStyle = 'black';
-            context.fill();
-
-            context.textAlign = "right";
-            context.fillStyle = 'white';
-            context.fillText(
-              labelName,
-              projection(getItem(element).longlat)[0] - labelOffset - labelMargins,
-              projection(getItem(element).longlat)[1]
-            );
+              context.fillStyle = 'white';
+              context.textAlign = "left";
+              context.fillText(
+                labelName,
+                projection(getItem(element).longlat)[0] + labelOffset + labelMargins,
+                projection(getItem(element).longlat)[1]
+              );
 
 
-          }  // end label alternation
+            } else {
+
+              context.beginPath();
+              context.rect( 
+                projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
+                projection(getItem(element).longlat)[1] - fontSize,
+                labelWidth + labelMargins * 2,
+                fontSize * 2,
+              );
+              context.fillStyle = 'black';
+              context.fill();
+
+              context.textAlign = "right";
+              context.fillStyle = 'white';
+              context.fillText(
+                labelName,
+                projection(getItem(element).longlat)[0] - labelOffset - labelMargins,
+                projection(getItem(element).longlat)[1]
+              );
+
+
+            }  // end label alternation
+          }
+
+          else {
+            // Top and bottom labels
+            if (!i % 2) {
+
+              context.beginPath();
+              context.rect( 
+                projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2,
+                projection(getItem(element).longlat)[1] - fontSize * 2 - labelOffset,
+                labelWidth + labelMargins * 2,
+                fontSize * 2,
+              );
+              context.fillStyle = 'black';
+              context.fill();
+
+              context.fillStyle = 'white';
+              context.textAlign = "left";
+              context.fillText(
+                labelName,
+                projection(getItem(element).longlat)[0] - (labelWidth) / 2,
+                projection(getItem(element).longlat)[1] - fontSize - labelOffset
+              );
+
+            } else {
+
+              context.beginPath();
+              context.rect( 
+                projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2, 
+                projection(getItem(element).longlat)[1] + labelOffset,
+                labelWidth + labelMargins * 2,
+                fontSize * 2,
+              );
+              context.fillStyle = 'black';
+              context.fill();
+
+              context.textAlign = "left";
+              context.fillStyle = 'white';
+              context.fillText(
+                labelName,
+                projection(getItem(element).longlat)[0] - (labelWidth) / 2,
+                projection(getItem(element).longlat)[1] + fontSize + labelOffset
+              );
+
+            }  // end label alternation
+          }
 
         }
       }, this);
@@ -479,6 +531,12 @@ function dataLoaded(error, data) {
   resizeCanvas = function () {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
+
+    if(screenHeight > screenWidth){
+      isLandscape = false;
+    } else {
+      isLandscape = true;
+    }
 
 
     setMargins();
