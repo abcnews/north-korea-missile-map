@@ -103,5 +103,21 @@
     "id": "mardelplata",
     "name": "Mar del Plata",
     "longlat": [-57.542611, -38.005477]
+  },
+
+{
+    "id": "fifthtest",
+    "name": "Approximate landing 5th test",
+    "longlat": [158.115234, 43.452918]
+  },
+  {
+    "id": "sixthtest",
+    "name": "Approximate landing 6th test",
+    "longlat": [169.656855, 41.229800]
+  },
+  {
+    "id": "seoul",
+    "name": "Seoul",
+    "longlat": [126.992971, 37.550320]
   }
 ]}

@@ -36,11 +36,11 @@ const geojsonUrl = placeholder.dataset.geojson;
 const storyDataUrl = placeholder.dataset.storydata;
 
 
-var zoomScale = d3.scaleLinear()
-.domain([-5, 9])
-.range([0, 50]);
+// var zoomScale = d3.scaleLinear()
+//   .domain([-5, 9])
+//   .range([0, 50]);
 
-
+// We are loading data through d3-queue
 function dataLoaded(error, data) {
   if (error) throw error;
 
@@ -169,23 +169,26 @@ function dataLoaded(error, data) {
     context.clearRect(0, 0, screenWidth, screenHeight);
 
     // Draw the water
-    context.beginPath()
+    context.beginPath();
     context.fillStyle = '#E3F4F9';
     path(globe);
     context.fill();
 
     // Draw landmass
     context.beginPath();
-    context.fillStyle = '#666';
+    context.strokeStyle = '#1D3C43';
+    context.fillStyle = 'white';
+    context.lineWidth = 1.6;
     path(land);
     context.fill();
+    context.stroke();
 
     // Draw outline of countries
-    context.beginPath();
-    context.strokeStyle = "#1D3C43";
-    context.lineWidth = 1;
-    path(borders);
-    context.stroke();
+    // context.beginPath();
+    // context.strokeStyle = "#1D3C43";
+    // context.lineWidth = 1;
+    // path(borders);
+    // context.stroke();
 
     // Draw launch country
     context.beginPath();
@@ -209,7 +212,7 @@ function dataLoaded(error, data) {
     // Draw circle radius
     context.beginPath();
     context.strokeStyle = "#FF6100";
-    context.lineWidth = 1.5;
+    context.lineWidth = 1.6;
     path(rangeCircle());
     context.stroke();
 
@@ -241,7 +244,8 @@ function dataLoaded(error, data) {
     } // end if (currentLabel)
 
     function drawLabels() {
-      currentLabels.forEach(function(element) {
+      currentLabels.forEach(function(element, i) {
+        
         let geoAngle = d3.geoDistance(
           getItem(element).longlat,
           [
@@ -266,7 +270,7 @@ function dataLoaded(error, data) {
           context.arc(
             projection(getItem(element).longlat)[0],
             projection(getItem(element).longlat)[1],
-            pointRadius, 
+            pointRadius,
             0, // Starting point on arc
             2*Math.PI); // Go around the whole circle
           context.fill();
@@ -275,12 +279,25 @@ function dataLoaded(error, data) {
           // Draw comparison label text
           context.fillStyle = 'black';
           context.font = "italic 16px Roboto";
-          context.textBaseline="middle"; 
-          context.fillText(
-            getItem(element).name,
-            projection(getItem(element).longlat)[0] + 10,
-            projection(getItem(element).longlat)[1]
-          );
+          context.textBaseline = "middle";
+
+          // Alternate labels left and right align
+          if (i % 2) {
+            context.textAlign = "right";
+            context.fillText(
+              getItem(element).name,
+              projection(getItem(element).longlat)[0] - 10,
+              projection(getItem(element).longlat)[1]
+            );
+          } else {
+            context.textAlign = "left";
+            context.fillText(
+              getItem(element).name,
+              projection(getItem(element).longlat)[0] + 10,
+              projection(getItem(element).longlat)[1]
+            );
+          }  // end label alternation
+
         }
       }, this);
     }
