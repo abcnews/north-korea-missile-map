@@ -281,7 +281,7 @@ function dataLoaded(error, data) {
             2*Math.PI); // Go around the whole circle
           context.fill();
           context.stroke();
-          
+
 
           // Draw comparison label text
 
@@ -298,7 +298,7 @@ function dataLoaded(error, data) {
 
           if (isLandscape) {
             // Alternate labels left and right align
-            if (!i % 2) {
+            if (i % 2 === 0) {
 
               context.beginPath();
               context.rect( 
@@ -345,7 +345,7 @@ function dataLoaded(error, data) {
 
           else {
             // Top and bottom labels
-            if (!i % 2) {
+            if (i % 2 === 0) {
 
               context.beginPath();
               context.rect( 
