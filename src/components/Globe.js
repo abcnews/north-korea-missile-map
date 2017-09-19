@@ -277,22 +277,50 @@ function dataLoaded(error, data) {
           context.stroke();
 
           // Draw comparison label text
-          context.fillStyle = 'white';
-          context.font = '700 18px ABCSans';
-          context.textBaseline = "middle";
+          
+          
 
-          let labelWidth = context.measureText(getItem(element).name).width;
-          let labelName = getItem(element).name;
+          let labelName = getItem(element).name.split("").join(String.fromCharCode(8202));
+          let labelWidth = context.measureText(labelName).width;
+          let fontSize = 18;
+          let labelMargins = 18;
+
+          let labelOffset = 30;
+
+          context.font = `700 ${fontSize}px ABCSans`;
+          context.textBaseline = "middle";
+          
 
           // Alternate labels left and right align
-          if (i % 2) {
+          if (!i % 2) {
 
             context.beginPath();
             context.rect( 
-              projection(getItem(element).longlat)[0] - labelWidth - 40 - (labelName.length * 2), 
-              projection(getItem(element).longlat)[1] - 18,
-              labelWidth + 20 + (labelName.length * 2),
-              36,
+              projection(getItem(element).longlat)[0] + labelOffset,
+              projection(getItem(element).longlat)[1] - fontSize,
+              labelWidth + labelMargins * 2,
+              fontSize * 2,
+            );
+            context.fillStyle = 'black';
+            context.fill();
+
+            context.fillStyle = 'white';
+            context.textAlign = "left";
+            context.fillText(
+              labelName,
+              projection(getItem(element).longlat)[0] + labelOffset + labelMargins,
+              projection(getItem(element).longlat)[1]
+            );
+
+
+          } else {
+
+            context.beginPath();
+            context.rect( 
+              projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
+              projection(getItem(element).longlat)[1] - fontSize,
+              labelWidth + labelMargins * 2,
+              fontSize * 2,
             );
             context.fillStyle = 'black';
             context.fill();
@@ -300,17 +328,12 @@ function dataLoaded(error, data) {
             context.textAlign = "right";
             context.fillStyle = 'white';
             context.fillText(
-              labelName.split("").join(String.fromCharCode(8202)),
-              projection(getItem(element).longlat)[0] - 33,
+              labelName,
+              projection(getItem(element).longlat)[0] - labelOffset - labelMargins,
               projection(getItem(element).longlat)[1]
             );
-          } else {
-            context.textAlign = "left";
-            context.fillText(
-              getItem(element).name,
-              projection(getItem(element).longlat)[0] + 10,
-              projection(getItem(element).longlat)[1]
-            );
+
+
           }  // end label alternation
 
         }
