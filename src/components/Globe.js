@@ -379,7 +379,10 @@ function dataLoaded(error, data) {
             }  // end label alternation
           }
 
-          else { // If on mobile
+          else { // If on portrait
+
+            labelOffset = labelOffset * 0.7; // Tweak the pointer height a bit
+            
             // Top and bottom labels
             if (i % 2 === 0) {
 
