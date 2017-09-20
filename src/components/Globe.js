@@ -297,6 +297,7 @@ function dataLoaded(error, data) {
 
           let labelOffset = 30;
           let pointerOffset = 12;
+          let mobilePointerShrink = 0.6;
 
           context.font = `700 ${fontSize}px ABCSans`;
           context.textBaseline = "middle";
@@ -378,17 +379,37 @@ function dataLoaded(error, data) {
             }  // end label alternation
           }
 
-          else {
+          else { // If on mobile
             // Top and bottom labels
             if (i % 2 === 0) {
 
+              // context.beginPath();
+              // context.rect( 
+              //   projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2,
+              //   projection(getItem(element).longlat)[1] - fontSize * 2 - labelOffset,
+              //   labelWidth + labelMargins * 2,
+              //   fontSize * 2,
+              // );
+              // context.fillStyle = 'black';
+              // context.fill();
+
+              // Top label with pointer
               context.beginPath();
-              context.rect( 
-                projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2,
-                projection(getItem(element).longlat)[1] - fontSize * 2 - labelOffset,
-                labelWidth + labelMargins * 2,
-                fontSize * 2,
-              );
+              context.moveTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
+                markerLatitude - labelOffset - fontSize * 2);
+              context.lineTo(markerLongitude + (labelWidth + labelMargins * 2) / 2,
+                markerLatitude - labelOffset - fontSize * 2);
+              context.lineTo(markerLongitude + (labelWidth + labelMargins * 2) / 2,
+                markerLatitude - labelOffset);
+              context.lineTo(markerLongitude + fontSize * mobilePointerShrink,
+                markerLatitude - labelOffset);
+              context.lineTo(markerLongitude,
+                markerLatitude - pointerOffset);
+              context.lineTo(markerLongitude - fontSize * mobilePointerShrink,
+                markerLatitude - labelOffset);
+              context.lineTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
+              markerLatitude - labelOffset);
+              context.closePath();
               context.fillStyle = 'black';
               context.fill();
 
@@ -402,13 +423,32 @@ function dataLoaded(error, data) {
 
             } else {
 
+              // context.beginPath();
+              // context.rect( 
+              //   projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2, 
+              //   projection(getItem(element).longlat)[1] + labelOffset,
+              //   labelWidth + labelMargins * 2,
+              //   fontSize * 2,
+              // );
+              // context.fillStyle = 'black';
+              // context.fill();
+
               context.beginPath();
-              context.rect( 
-                projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2, 
-                projection(getItem(element).longlat)[1] + labelOffset,
-                labelWidth + labelMargins * 2,
-                fontSize * 2,
-              );
+              context.moveTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
+                markerLatitude + labelOffset); // Top left corner
+              context.lineTo(markerLongitude - fontSize * mobilePointerShrink,
+                markerLatitude + labelOffset);
+              context.lineTo(markerLongitude, // Point
+                markerLatitude + pointerOffset);
+              context.lineTo(markerLongitude + fontSize * mobilePointerShrink,
+                markerLatitude + labelOffset);
+              context.lineTo(markerLongitude + (labelWidth + labelMargins * 2) / 2,
+                markerLatitude + labelOffset); // Right top corner
+              context.lineTo(markerLongitude + (labelWidth + labelMargins * 2) / 2,
+                markerLatitude + labelOffset + fontSize * 2); // Right bottom corner
+              context.lineTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
+                markerLatitude + labelOffset + fontSize * 2); // Left bottom corner
+              context.closePath();
               context.fillStyle = 'black';
               context.fill();
 
