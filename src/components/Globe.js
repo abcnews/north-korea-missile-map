@@ -34,7 +34,8 @@ setMargins();
 
 let focusPoint = [125.7625, 39.0392], // Pyongyang, North Korea
     launchCountryCode = 408,
-    launchDotRadius = 60;
+    launchDotRadius = 60,
+    tweenRange = 0;
 
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
@@ -42,11 +43,9 @@ const geojsonUrl = placeholder.dataset.geojson;
 const storyDataUrl = placeholder.dataset.storydata;
 
 
-// var zoomScale = d3.scaleLinear()
-//   .domain([-5, 9])
-//   .range([0, 50]);
 
-// We are loading data through d3-queue
+
+// We are loading JSON data through d3-queue
 function dataLoaded(error, data) {
   if (error) throw error;
 
@@ -78,8 +77,6 @@ function dataLoaded(error, data) {
     .clipAngle(90)
     .precision(0.1)
     .fitExtent([[margins,margins], [screenWidth -margins, screenHeight -margins]], globe);
-    // .fitSize([width, height], globe)
-    // .scale(299);
 
   initialGlobeScale = projection.scale();
 
@@ -345,6 +342,7 @@ function dataLoaded(error, data) {
           context.stroke();
 
 
+
           // Draw comparison label text
 
           let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
@@ -527,7 +525,17 @@ function dataLoaded(error, data) {
 
         }
       }, this);
+    } // end drawLabels function
+
+
+    // Experimenting with displaying range on canvas
+    if (currentRangeInKms) {
+      context.fillStyle = 'black';
+      context.textAlign = "left";
+      context.textBaseline = "middle";
+      context.fillText(Math.ceil(tweenRange) + 'kms', 100, 100);
     }
+
 
   } // end drawWorld function
 
@@ -583,12 +591,14 @@ function dataLoaded(error, data) {
             kmsToRadius(0), 
             kmsToRadius(currentRangeInKms)
           );
+          let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
 
           return function (time) {
 
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
             geoCircle.radius(radiusBlip(time));
+            tweenRange = rangeDisplay(time);
 
             drawWorld();
           }
