@@ -147,7 +147,7 @@ function dataLoaded(error, data) {
   const initialPoint = getItem('pyongyang').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
-  const geoCircle = d3.geoCircle();
+  const geoCircle = d3.geoCircle().center(focusPoint);
 
   // Red dot to mark launch site
   // const launchPointCircle = d3.geoCircle()
@@ -175,8 +175,6 @@ function dataLoaded(error, data) {
     // context.fillRect(0, 0, screenWidth, screenHeight); // Trippy clear trails just testing
     context.clearRect(0, 0, screenWidth, screenHeight);
 
-    
-
     // Draw the water
     context.beginPath();
     context.fillStyle = '#E3F4F9';
@@ -195,7 +193,7 @@ function dataLoaded(error, data) {
     // Draw outline of countries
     context.beginPath();
     context.strokeStyle = "#1D3C43";
-    context.lineWidth = 1;
+    context.lineWidth = screenWidth < 700 ? 1.1 : 1.6;
     path(borders);
     context.stroke();
 
@@ -218,28 +216,89 @@ function dataLoaded(error, data) {
     // context.fill();
     // context.stroke();
 
+
+    // An experiment using clip and blur shadow
+
+    // context.save();
+
+    // context.beginPath();
+    // context.strokeStyle = "#FF6100";
+    // context.lineWidth = 3;
+    // path(geoCircle.center(focusPoint)
+    //   .radius(kmsToRadius(currentRangeInKms))());
+    
+    // context.clip();
+
+    // context.beginPath();
+    // context.strokeStyle = "#FF6100";
+    // context.lineWidth = 1;
+    // path(geoCircle.center(focusPoint)
+    //   .radius(kmsToRadius(currentRangeInKms + 10))());
+    // context.shadowColor   = 'black';
+    // context.shadowBlur    = 15;
+    // context.shadowOffsetX = 0;
+    // context.shadowOffsetY = 0;
+    
+    // context.stroke();
+
+    context.beginPath();
+    context.globalAlpha = 0.15;
+    context.fillStyle = launchCountryColor;
+    // context.lineWidth = 1.6;
+    path(geoCircle());
+    context.fill();
+    context.globalAlpha = 1;
+    
+
     // Draw circle launch radius
     context.beginPath();
     context.strokeStyle = "#FF6100";
-    context.lineWidth = 1.6;
+    // context.fillStyle = '#555'
+    context.lineWidth = screenWidth < 700 ? 1.6 : 2.6;
     path(rangeCircle());
     context.stroke();
+    // context.globalAlpha = 0.15;
+    // context.globalCompositeOperation = 'destination-out';
+    // context.fill();
+    // context.globalAlpha = 1;
+    // context.globalCompositeOperation = 'source-over';
+
+
+    // context.beginPath();
+    // // context.globalAlpha = 0.9;
+    // context.strokeStyle = "#FF6100";
+    // context.lineWidth = 1.6;
+    // path(geoCircle.center(focusPoint)
+    //   .radius(kmsToRadius(currentRangeInKms)));
+    // context.stroke();
+
+    // context.beginPath();
+    // context.strokeStyle = "#FF6100";
+    // context.lineWidth = 3;
+    // path(geoCircle.center(focusPoint)
+    //   .radius(kmsToRadius(currentRangeInKms - 100))());
+    // context.globalCompositeOperation = 'destination-out';
+    // context.fill();
+    // context.globalCompositeOperation = 'source-over';
+
+    // context.restore();
 
     // Draw a circle outline around the world
     context.beginPath()
     context.strokeStyle = "#1D3C43"
-    context.lineWidth = 2;
+    context.lineWidth = screenWidth < 700 ? 2 : 3;
     path(globe);
     context.stroke();
 
-    // Fill in the circle radius
-    context.beginPath();
-    context.globalAlpha = 0.3; // Maybe better Edge support
-    context.fillStyle = 'aquamarine';
-    // context.fillStyle = d3.lab(l,a,b, 0.3);
 
-    path(rangeCircle());
-    context.fill();
+    // Fill in the circle radius
+    // context.beginPath();
+    // context.globalAlpha = 0.3; // Maybe better Edge support
+    // context.fillStyle = 'aquamarine';
+    // // context.fillStyle = d3.lab(l,a,b, 0.3);
+
+    // path(rangeCircle());
+    // context.fill();
 
 
 
@@ -382,7 +441,7 @@ function dataLoaded(error, data) {
           else { // If on portrait
 
             labelOffset = labelOffset * 0.7; // Tweak the pointer height a bit
-            
+
             // Top and bottom labels
             if (i % 2 === 0) {
 
@@ -514,10 +573,14 @@ function dataLoaded(error, data) {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
-          
+
           let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1] ]);
           let radiusInterpolate = d3.interpolate(
             kmsToRadius(previousRangeInKms), 
+            kmsToRadius(currentRangeInKms)
+          );
+          let radiusBlip = d3.interpolate(
+            kmsToRadius(0), 
             kmsToRadius(currentRangeInKms)
           );
 
@@ -525,6 +588,7 @@ function dataLoaded(error, data) {
 
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
+            geoCircle.radius(radiusBlip(time));
 
             drawWorld();
           }
