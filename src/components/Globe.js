@@ -1,15 +1,17 @@
 const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
-// const d3 = require('d3');
+
 import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
 
 const styles = require('./Globe.scss');
 
-let mark, // Widen scope so we can unmount?
-    resizeCanvas;
+const abcBackgroundColor = "#f9f9f9";
+
+let mark, // Widen scope so we can unmount event listeners?
+    resizeCanvas; // Is there a better way to do this? Probably
 
 let screenWidth = window.innerWidth,
     screenHeight = window.innerHeight,
@@ -19,14 +21,15 @@ let screenWidth = window.innerWidth,
     launchCountryColor = "#21849B",
     pointFill = "#FF6100",
     pointStroke = "white",
+    landStrokeColor = "#1D3C43",
     pointRadius = 6,
     pointLineWidth = 2,
     transitionDuration = 1300,
     isLandscape = true;
     
-    if(window.innerHeight > window.innerWidth){
-      isLandscape = !isLandscape;
-    }
+if (window.innerHeight > window.innerWidth) {
+  isLandscape = !isLandscape;
+}
 
 
 
@@ -95,44 +98,6 @@ function dataLoaded(error, data) {
   // Pixel display and High DPI monitor scaling
   canvasDpiScaler(canvasEl, context);
 
-
-
-  // var obj = document.getElementById('id');
-  // canvasEl.addEventListener('touchmove', function(event) {
-  //   // If there's exactly one finger inside this element
-  //   if (event.targetTouches.length == 2) {
-  //     // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
-  //   }
-  // }, false);
-
-  if (!isMobileDevice()) {
-    // Click and drag disable for now because can't scroll on touch devices
-    // Detect media and disable
-    canvas.call(d3.drag()
-      // .filter(true) // Find out how to filter touch events
-      .on("start", dragstarted)
-      .on("drag", dragged));
-
-      let 
-        v0, // Mouse position in Cartesian coordinates at start of drag gesture.
-        r0, // Projection rotation as Euler angles at start.
-        q0; // Projection rotation as versor at start.
-
-      function dragstarted() {
-        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
-        r0 = projection.rotate();
-        q0 = versor(r0);
-      }
-
-      function dragged() {
-        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
-            q1 = versor.multiply(q0, versor.delta(v0, v1)),
-            r1 = versor.rotation(q1);
-        projection.rotate(r1);
-        drawWorld();
-      }
-    } // end if (!isMobileDevice())
-
   // Build a path generator
   const path = d3.geoPath()
     .projection(projection)
@@ -146,10 +111,6 @@ function dataLoaded(error, data) {
 
   const geoCircle = d3.geoCircle().center(focusPoint);
 
-  // Red dot to mark launch site
-  // const launchPointCircle = d3.geoCircle()
-  //                             .center(focusPoint)
-  //                             .radius(kmsToRadius(70));
 
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
@@ -168,29 +129,27 @@ function dataLoaded(error, data) {
   function drawWorld(label) {
 
     // Clear the canvas ready for redraw
-    // context.fillStyle = 'rgba(255, 255, 255, 0.2)';
-    // context.fillRect(0, 0, screenWidth, screenHeight); // Trippy clear trails just testing
     context.clearRect(0, 0, screenWidth, screenHeight);
 
     // Draw the water
     context.beginPath();
-    context.fillStyle = '#E3F4F9';
+    context.fillStyle = '#E4EDF0';
     path(globe);
     context.fill();
 
     // Draw landmass
     context.beginPath();
-    context.strokeStyle = '#1D3C43';
+    context.strokeStyle = landStrokeColor;
     context.fillStyle = 'white';
-    context.lineWidth = screenWidth < 700 ? 1.1 : 1.6;
+    context.lineWidth = screenWidth < 700 ? 0.5 : 1.1;
     path(land);
     context.fill();
     context.stroke();
 
     // Draw outline of countries
     context.beginPath();
-    context.strokeStyle = "#1D3C43";
-    context.lineWidth = screenWidth < 700 ? 1.1 : 1.6;
+    context.strokeStyle = landStrokeColor;
+    context.lineWidth = screenWidth < 700 ? 0.5 : 1.1;
     path(borders);
     context.stroke();
 
@@ -200,108 +159,33 @@ function dataLoaded(error, data) {
     path(countries.find(item => item.id === launchCountryCode));
     context.fill();
 
-    // Point out launch point
-    // context.beginPath();
-    // context.fillStyle = pointFill;
-    // context.strokeStyle = pointStroke;
-    // context.lineWidth = 1;
-    // path(
-    //   geoCircle
-    //   .center(d3.geoCentroid(countries.find(item => item.id === launchCountryCode))) //focusPoint)
-    //   .radius(kmsToRadius(launchDotRadius))()
-    // )
-    // context.fill();
-    // context.stroke();
-
-
-    // An experiment using clip and blur shadow
-
-    // context.save();
-
-    // context.beginPath();
-    // context.strokeStyle = "#FF6100";
-    // context.lineWidth = 3;
-    // path(geoCircle.center(focusPoint)
-    //   .radius(kmsToRadius(currentRangeInKms))());
-    
-    // context.clip();
-
-    // context.beginPath();
-    // context.strokeStyle = "#FF6100";
-    // context.lineWidth = 1;
-    // path(geoCircle.center(focusPoint)
-    //   .radius(kmsToRadius(currentRangeInKms + 10))());
-    // context.shadowColor   = 'black';
-    // context.shadowBlur    = 15;
-    // context.shadowOffsetX = 0;
-    // context.shadowOffsetY = 0;
-    
-    // context.stroke();
-
-    context.beginPath();
-    context.globalAlpha = 0.15;
-    context.fillStyle = launchCountryColor;
-    // context.lineWidth = 1.6;
-    path(geoCircle());
-    context.fill();
-    context.globalAlpha = 1;
-    
 
     // Draw circle launch radius
     context.beginPath();
     context.strokeStyle = "#FF6100";
-    // context.fillStyle = '#555'
-    context.lineWidth = screenWidth < 700 ? 1.6 : 2.6;
+    context.globalAlpha = 0.1;
+    context.fillStyle = '#FF4D00'
+    context.lineWidth = screenWidth < 700 ? 2 : 3;
     path(rangeCircle());
+    context.fill();
+    context.globalAlpha = 1;
     context.stroke();
-    // context.globalAlpha = 0.15;
-    // context.globalCompositeOperation = 'destination-out';
-    // context.fill();
-    // context.globalAlpha = 1;
-    // context.globalCompositeOperation = 'source-over';
-
-
-    // context.beginPath();
-    // // context.globalAlpha = 0.9;
-    // context.strokeStyle = "#FF6100";
-    // context.lineWidth = 1.6;
-    // path(geoCircle.center(focusPoint)
-    //   .radius(kmsToRadius(currentRangeInKms)));
-    // context.stroke();
-
-    // context.beginPath();
-    // context.strokeStyle = "#FF6100";
-    // context.lineWidth = 3;
-    // path(geoCircle.center(focusPoint)
-    //   .radius(kmsToRadius(currentRangeInKms - 100))());
-    // context.globalCompositeOperation = 'destination-out';
-    // context.fill();
-    // context.globalCompositeOperation = 'source-over';
-
-    // context.restore();
 
     // Draw a circle outline around the world
+    // First clear any radius 
     context.beginPath()
-    context.strokeStyle = "#1D3C43"
-    context.lineWidth = screenWidth < 700 ? 2 : 3;
+    context.strokeStyle = abcBackgroundColor;
+    context.lineWidth = 12;
     path(globe);
     context.stroke();
 
-
-    // Fill in the circle radius
-    // context.beginPath();
-    // context.globalAlpha = 0.3; // Maybe better Edge support
-    // context.fillStyle = 'aquamarine';
-    // // context.fillStyle = d3.lab(l,a,b, 0.3);
-
-    // path(rangeCircle());
-    // context.fill();
-
-
-
-    // Reset global alpha
-    context.globalAlpha = 1;
-
+    context.beginPath()
+    context.strokeStyle = "#B6CED6";
+    context.lineWidth = screenWidth < 700 ? 2 : 2;
+    projection.scale(projection.scale() - 5)
+    path(globe);
+    context.stroke();
+    projection.scale(projection.scale() + 5)
 
       // Please hide labels when on other side of the planet
     if (currentLabels && currentLabels[0]) {
@@ -327,11 +211,7 @@ function dataLoaded(error, data) {
           context.fillStyle = pointFill;
           context.strokeStyle = pointStroke;
           context.lineWidth = pointLineWidth;
-          // path(
-          //     geoCircle
-          //     .center(getItem(currentLabel).longlat)
-          //     .radius(kmsToRadius(pointRadius))()
-          //   );
+          
           context.arc(
             projection(getItem(element).longlat)[0],
             projection(getItem(element).longlat)[1],
@@ -344,7 +224,6 @@ function dataLoaded(error, data) {
 
 
           // Draw comparison label text
-
           let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
           let labelWidth = context.measureText(labelName).width;
           let fontSize = screenWidth < 700 ? 16 : 18;
@@ -363,16 +242,6 @@ function dataLoaded(error, data) {
           if (isLandscape) {
             // Alternate labels left and right align
             if (i % 2 === 0) {
-
-              // context.beginPath();
-              // context.rect( 
-              //   markerLongitude + labelOffset,
-              //   markerLatitude - fontSize,
-              //   labelWidth + labelMargins * 2,
-              //   fontSize * 2,
-              // );
-              // context.fillStyle = 'black';
-              // context.fill();
 
               // Draw the background and pointer
               context.beginPath();
@@ -399,17 +268,6 @@ function dataLoaded(error, data) {
 
             } else {
               // Right aligned text pointers
-
-              // context.beginPath();
-              // context.rect( 
-              //   projection(getItem(element).longlat)[0] - labelWidth - labelOffset - labelMargins * 2, 
-              //   projection(getItem(element).longlat)[1] - fontSize,
-              //   labelWidth + labelMargins * 2,
-              //   fontSize * 2,
-              // );
-              // context.fillStyle = 'black';
-              // context.fill();
-
               // Draw the background and pointer
               context.beginPath();
               context.moveTo(markerLongitude - labelOffset - labelWidth - labelMargins * 2,
@@ -431,8 +289,6 @@ function dataLoaded(error, data) {
                 projection(getItem(element).longlat)[0] - labelOffset - labelMargins,
                 projection(getItem(element).longlat)[1]
               );
-
-
             }  // end label alternation
           }
 
@@ -442,17 +298,6 @@ function dataLoaded(error, data) {
 
             // Top and bottom labels
             if (i % 2 === 0) {
-
-              // context.beginPath();
-              // context.rect( 
-              //   projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2,
-              //   projection(getItem(element).longlat)[1] - fontSize * 2 - labelOffset,
-              //   labelWidth + labelMargins * 2,
-              //   fontSize * 2,
-              // );
-              // context.fillStyle = 'black';
-              // context.fill();
-
               // Top label with pointer
               context.beginPath();
               context.moveTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
@@ -482,16 +327,6 @@ function dataLoaded(error, data) {
               );
 
             } else {
-
-              // context.beginPath();
-              // context.rect( 
-              //   projection(getItem(element).longlat)[0] - (labelWidth + labelMargins * 2) / 2, 
-              //   projection(getItem(element).longlat)[1] + labelOffset,
-              //   labelWidth + labelMargins * 2,
-              //   fontSize * 2,
-              // );
-              // context.fillStyle = 'black';
-              // context.fill();
 
               context.beginPath();
               context.moveTo(markerLongitude - (labelWidth + labelMargins * 2) / 2,
@@ -529,16 +364,15 @@ function dataLoaded(error, data) {
 
 
     // Experimenting with displaying range on canvas
-    if (currentRangeInKms) {
-      context.fillStyle = 'black';
-      context.textAlign = "left";
-      context.textBaseline = "middle";
-      context.fillText(Math.ceil(tweenRange) + 'kms', 100, 100);
-    }
+    // if (currentRangeInKms) {
+    //   context.fillStyle = 'black';
+    //   context.textAlign = "left";
+    //   context.textBaseline = "middle";
+    //   context.fillText(Math.ceil(tweenRange) + 'kms', 100, 100);
+    // }
 
 
   } // end drawWorld function
-
 
 
   mark = function (event) {
@@ -551,7 +385,6 @@ function dataLoaded(error, data) {
       currentLabels = [event.detail.activated.config.label];
     }
 
-    // currentLabels = [event.detail.activated.config.label];
 
 
     currentRangeInKms = event.detail.activated.config.range;
@@ -587,17 +420,12 @@ function dataLoaded(error, data) {
             kmsToRadius(previousRangeInKms), 
             kmsToRadius(currentRangeInKms)
           );
-          let radiusBlip = d3.interpolate(
-            kmsToRadius(0), 
-            kmsToRadius(currentRangeInKms)
-          );
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
 
           return function (time) {
 
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
-            geoCircle.radius(radiusBlip(time));
             tweenRange = rangeDisplay(time);
 
             drawWorld();
@@ -675,8 +503,7 @@ function dataLoaded(error, data) {
         });
     }
 
-        
-      
+
   }; // mark function
 
   // Handle screen resizes
@@ -711,6 +538,46 @@ function dataLoaded(error, data) {
 
     drawWorld();
   }
+
+
+  // Experimental feature to allow flick and drag
+  // Need to make work on mobile with two finger drag maybe
+
+  // var obj = document.getElementById('id');
+  // canvasEl.addEventListener('touchmove', function(event) {
+  //   // If there's exactly one finger inside this element
+  //   if (event.targetTouches.length == 2) {
+  //     // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
+  //   }
+  // }, false);
+
+  if (!isMobileDevice()) {
+    // Click and drag disable for now because can't scroll on touch devices
+    // Detect media and disable
+    canvas.call(d3.drag()
+      // .filter(true) // Find out how to filter touch events
+      .on("start", dragstarted)
+      .on("drag", dragged));
+
+      let 
+        v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+        r0, // Projection rotation as Euler angles at start.
+        q0; // Projection rotation as versor at start.
+
+      function dragstarted() {
+        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
+        r0 = projection.rotate();
+        q0 = versor(r0);
+      }
+
+      function dragged() {
+        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+            q1 = versor.multiply(q0, versor.delta(v0, v1)),
+            r1 = versor.rotation(q1);
+        projection.rotate(r1);
+        drawWorld();
+      }
+    } // end if (!isMobileDevice())
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);
