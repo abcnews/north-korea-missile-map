@@ -1,8 +1,8 @@
 const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
-
-import d3 from '../d3-custom'; // Modularise D3
+const d3 = require('d3');
+// import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
 
@@ -236,7 +236,7 @@ function dataLoaded(error, data) {
           let mobilePointerShrink = 0.6;
 
           context.font = `700 ${fontSize}px ABCSans`;
-          context.textBaseline = "middle";
+          context.textBaseline = "bottom";
           
 
           if (isLandscape) {
@@ -262,7 +262,7 @@ function dataLoaded(error, data) {
               context.fillText(
                 labelName,
                 markerLongitude + labelOffset + labelMargins,
-                markerLatitude
+                markerLatitude + fontSize * 0.6 // Firefox doesn't do baseline properly so nudging the centre
               );
 
 
@@ -286,8 +286,8 @@ function dataLoaded(error, data) {
               context.fillStyle = 'white';
               context.fillText(
                 labelName,
-                projection(getItem(element).longlat)[0] - labelOffset - labelMargins,
-                projection(getItem(element).longlat)[1]
+                markerLongitude - labelOffset - labelMargins,
+                markerLatitude + fontSize * 0.6
               );
             }  // end label alternation
           }
@@ -322,8 +322,8 @@ function dataLoaded(error, data) {
               context.textAlign = "left";
               context.fillText(
                 labelName,
-                projection(getItem(element).longlat)[0] - (labelWidth) / 2,
-                projection(getItem(element).longlat)[1] - fontSize - labelOffset
+                markerLongitude - (labelWidth) / 2,
+                markerLatitude - fontSize * 0.4 - labelOffset
               );
 
             } else {
@@ -351,8 +351,8 @@ function dataLoaded(error, data) {
               context.fillStyle = 'white';
               context.fillText(
                 labelName,
-                projection(getItem(element).longlat)[0] - (labelWidth) / 2,
-                projection(getItem(element).longlat)[1] + fontSize + labelOffset
+                markerLongitude - (labelWidth) / 2,
+                markerLatitude + fontSize * 1.6 + labelOffset
               );
 
             }  // end label alternation
@@ -518,6 +518,7 @@ function dataLoaded(error, data) {
     }
 
 
+
     setMargins();
 
     canvas.attr('width', screenWidth)
@@ -542,41 +543,89 @@ function dataLoaded(error, data) {
 
   // Experimental feature to allow flick and drag
   // Need to make work on mobile with two finger drag maybe
+  // Still very rough
+  let allowRotate = false;
 
-  // var obj = document.getElementById('id');
-  // canvasEl.addEventListener('touchmove', function(event) {
-  //   // If there's exactly one finger inside this element
-  //   if (event.targetTouches.length == 2) {
-  //     // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
-  //   }
-  // }, false);
+  let 
+    v0, // Mouse position in Cartesian coordinates at start of drag gesture.
+    r0, // Projection rotation as Euler angles at start.
+    q0; // Projection rotation as versor at start.
 
-  if (!isMobileDevice()) {
-    // Click and drag disable for now because can't scroll on touch devices
-    // Detect media and disable
-    canvas.call(d3.drag()
-      // .filter(true) // Find out how to filter touch events
-      .on("start", dragstarted)
-      .on("drag", dragged));
+  // Click and drag disable for now because can't scroll on touch devices
+  // Detect media and disable
+  let drag = d3.drag();
 
-      let 
-        v0, // Mouse position in Cartesian coordinates at start of drag gesture.
-        r0, // Projection rotation as Euler angles at start.
-        q0; // Projection rotation as versor at start.
 
-      function dragstarted() {
-        v0 = versor.cartesian(projection.invert(d3.mouse(this)));
-        r0 = projection.rotate();
-        q0 = versor(r0);
+canvas.on('mousedown', function() {
+    console.log(d3.mouse(this));
+    dragstarted(this);
+    // If there's exactly one finger inside this element
+    // if (event.targetTouches.length == 2) {
+    //   // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
+    //   // dragstarted(canvas);
+
+    //   // console.log('hhello');
+
+
+    // }
+  }, false);
+
+  canvas.on('mouseup', function() {
+    console.log(d3.mouse(this));
+    dragged(this);
+ 
+  }, false);
+
+
+
+  canvas.on('touchstart', function() {
+    // If there's exactly one finger inside this element
+    if (event.targetTouches.length == 2) {
+      // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
+      // dragstarted(canvas);
+      allowRotate = true;
+      dragstarted(this);
+      event.preventDefault();
+    }
+  });
+
+  canvas.on('touchend', function() {
+    // If there's exactly one finger inside this element
+    if (allowRotate) {
+      dragged(this);
+    }
+      allowRotate = false;
+  });
+
+  
+  // d3.select('canvas').call(drag
+  //   .on("start", dragstarted)
+  //   .on("drag", dragged));
+    
+    
+
+      
+
+      function dragstarted(el) {
+        
+        
+          v0 = versor.cartesian(projection.invert(d3.mouse(el)));
+          r0 = projection.rotate();
+          q0 = versor(r0);
+        
       }
 
-      function dragged() {
-        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this))),
+      function dragged(el) {
+       
+        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(el))),
             q1 = versor.multiply(q0, versor.delta(v0, v1)),
             r1 = versor.rotation(q1);
         projection.rotate(r1);
         drawWorld();
+        
       }
+
+  if (!isMobileDevice()) {
     } // end if (!isMobileDevice())
 
   // Add event listener for our marks
