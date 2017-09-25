@@ -1,7 +1,7 @@
 const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
-const d3 = require('d3');
+const d3 = require('d3'); // Requiring all due to events not working with modules
 // import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
@@ -16,7 +16,7 @@ let mark, // Widen scope so we can unmount event listeners?
 let screenWidth = window.innerWidth,
     screenHeight = window.innerHeight,
     initialGlobeScale,
-    globeScale = 100, // Percent
+    globeScale = 100, // as percentage %
     margins,
     launchCountryColor = "#21849B",
     pointFill = "#FF6100",
@@ -217,7 +217,7 @@ function dataLoaded(error, data) {
             projection(getItem(element).longlat)[1],
             pointRadius,
             0, // Starting point on arc
-            2*Math.PI); // Go around the whole circle
+            2 * Math.PI); // Go around the whole circle
           context.fill();
           context.stroke();
 
@@ -386,7 +386,6 @@ function dataLoaded(error, data) {
     }
 
 
-
     currentRangeInKms = event.detail.activated.config.range;
     previousRangeInKms = event.detail.deactivated ? event.detail.deactivated.config.range : 0;
 
@@ -397,13 +396,17 @@ function dataLoaded(error, data) {
       if (event.detail.activated.config.zoom && event.detail.deactivated.config.zoom) {
         shouldZoomOut = true;
       } 
-    } catch (e) {}
+    } catch (error) {
+      console.log(error);
+    }
     
 
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
     let currentRotation = projection.rotate();
 
+    // Instead of transitioning directly on elements
+    // we transition using tween functions on dummy elements
     const dummyRotate = {},
           dummyZoom = {};
 
@@ -518,7 +521,6 @@ function dataLoaded(error, data) {
     }
 
 
-
     setMargins();
 
     canvas.attr('width', screenWidth)
@@ -541,10 +543,10 @@ function dataLoaded(error, data) {
   }
 
 
-  // Experimental feature to allow flick and drag
+  // Experimental feature to allow click and drag
   // Need to make work on mobile with two finger drag maybe
   // Still very rough
-  let allowRotate = false;
+  // let allowRotate = false;
 
   let 
     v0, // Mouse position in Cartesian coordinates at start of drag gesture.
@@ -553,16 +555,16 @@ function dataLoaded(error, data) {
 
   // Click and drag disable for now because can't scroll on touch devices
   // Detect media and disable
-  let drag = d3.drag();
+  // let drag = d3.drag();
 
 
 canvas.on('mousedown', function() {
-    dragstarted(this);
+    dragStarted(this);
 
     canvas.on('mousemove', function () {
       dragged(this);
     }, false);
-  
+
     canvas.on('mouseup', function() {
       dragged(this);
       canvas.on('mousemove', null);
@@ -574,33 +576,39 @@ canvas.on('mousedown', function() {
 
 
   canvas.on('touchstart', function() {
+    let that = this;
     // If there's exactly one finger inside this element
     if (event.targetTouches.length == 2) {
       // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
       // dragstarted(canvas);
-      allowRotate = true;
-      dragstarted(this);
+      // allowRotate = true;
+      touchDragStarted(this);
       event.preventDefault();
-    }
-  });
 
-  canvas.on('touchend', function() {
-    // If there's exactly one finger inside this element
-    if (allowRotate) {
-      dragged(this);
+      canvas.on('touchmove', function () {
+        touchDragged(this);
+      }, false);
+
+      canvas.on('touchend', function() {
+        // if (allowRotate) {
+          // touchDragged(this); // Not needed and it creates jumpiness anyway
+          canvas.on('touchmove', null);
+        // }
+          // allowRotate = false;
+      });
+
     }
-      allowRotate = false;
   });
 
   
+
+  // Original method. Need to modify to allow scroll in mobile.
   // d3.select('canvas').call(drag
   //   .on("start", dragstarted)
   //   .on("drag", dragged));
 
 
-      function dragstarted(el) {
-        
-        
+      function dragStarted(el) {
           v0 = versor.cartesian(projection.invert(d3.mouse(el)));
           r0 = projection.rotate();
           q0 = versor(r0);
@@ -608,14 +616,28 @@ canvas.on('mousedown', function() {
       }
 
       function dragged(el) {
-       
         var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(el))),
             q1 = versor.multiply(q0, versor.delta(v0, v1)),
             r1 = versor.rotation(q1);
         projection.rotate(r1);
         drawWorld();
-        
       }
+
+      // Handle touches differently to avoid jitter on two fingers
+      function touchDragStarted(el) {
+        v0 = versor.cartesian(projection.invert(d3.touches(el)[0]));
+        r0 = projection.rotate();
+        q0 = versor(r0);
+      
+    }
+
+    function touchDragged(el) {
+      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.touches(el)[0])),
+          q1 = versor.multiply(q0, versor.delta(v0, v1)),
+          r1 = versor.rotation(q1);
+      projection.rotate(r1);
+      drawWorld();
+    }
 
   if (!isMobileDevice()) {
     } // end if (!isMobileDevice())
