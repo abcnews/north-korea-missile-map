@@ -22,6 +22,7 @@ let screenWidth = window.innerWidth,
     pointFill = "#FF6100",
     pointStroke = "white",
     landStrokeColor = "#1D3C43",
+    landStrokeWidth = 0.5,
     pointRadius = 6,
     pointLineWidth = 2,
     transitionDuration = 1300,
@@ -78,7 +79,7 @@ function dataLoaded(error, data) {
   const projection = d3.geoOrthographic()
     .translate([screenWidth / 2, screenHeight / 2])
     .clipAngle(90)
-    .precision(0.1)
+    .precision(0.3)
     .fitExtent([[margins,margins], [screenWidth -margins, screenHeight -margins]], globe);
 
   initialGlobeScale = projection.scale();
@@ -104,17 +105,19 @@ function dataLoaded(error, data) {
     .context(context);
 
 
-  // Draw the initial Globe
+  // Render setup
 
   const initialPoint = getItem('northkorea').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
-  const geoCircle = d3.geoCircle().center(focusPoint);
+  // const geoCircle = d3.geoCircle().center(focusPoint);
 
 
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
+
+
 
   // Try to preload ABC Sans
   context.beginPath();
@@ -141,7 +144,7 @@ function dataLoaded(error, data) {
     context.beginPath();
     context.strokeStyle = landStrokeColor;
     context.fillStyle = 'white';
-    context.lineWidth = screenWidth < 700 ? 0.5 : 1.1;
+    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
     path(land);
     context.fill();
     context.stroke();
@@ -149,7 +152,7 @@ function dataLoaded(error, data) {
     // Draw outline of countries
     context.beginPath();
     context.strokeStyle = landStrokeColor;
-    context.lineWidth = screenWidth < 700 ? 0.5 : 1.1;
+    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
     path(borders);
     context.stroke();
 
@@ -165,7 +168,7 @@ function dataLoaded(error, data) {
     context.strokeStyle = "#FF6100";
     context.globalAlpha = 0.1;
     context.fillStyle = '#FF4D00'
-    context.lineWidth = screenWidth < 700 ? 2 : 3;
+    context.lineWidth = 3; //screenWidth < 700 ? 2 : 3;
     path(rangeCircle());
     context.fill();
     context.globalAlpha = 1;
@@ -181,7 +184,7 @@ function dataLoaded(error, data) {
 
     context.beginPath()
     context.strokeStyle = "#B6CED6";
-    context.lineWidth = screenWidth < 700 ? 2 : 2;
+    context.lineWidth = 2; // screenWidth < 700 ? 2 : 2;
     projection.scale(projection.scale() - 5)
     path(globe);
     context.stroke();
@@ -224,8 +227,7 @@ function dataLoaded(error, data) {
 
 
           // Draw comparison label text
-          let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
-          let labelWidth = context.measureText(labelName).width;
+          
           let fontSize = screenWidth < 700 ? 16 : 18;
           let labelMargins = 18;
           let markerLongitude = projection(getItem(element).longlat)[0];
@@ -237,11 +239,14 @@ function dataLoaded(error, data) {
 
           context.font = `700 ${fontSize}px ABCSans`;
           context.textBaseline = "bottom";
-          
+
+          let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
+          let labelWidth = context.measureText(labelName).width;
+
 
           if (isLandscape) {
             // Alternate labels left and right align
-            if (i % 2 === 0) {
+            if (i % 2 !== 0) {
 
               // Draw the background and pointer
               context.beginPath();
@@ -520,11 +525,11 @@ function dataLoaded(error, data) {
       isLandscape = true;
     }
 
+    canvas.attr('width', screenWidth)
+    .attr('height', screenHeight);
 
     setMargins();
 
-    canvas.attr('width', screenWidth)
-          .attr('height', screenHeight);
 
     projection.translate([screenWidth / 2, screenHeight / 2])
               .fitExtent([
@@ -532,9 +537,11 @@ function dataLoaded(error, data) {
                 [screenWidth -margins, screenHeight -margins]], 
                  globe);
 
-    initialGlobeScale = projection.scale();
-
     projection.scale(projection.scale() * globeScale / 100);
+
+    // initialGlobeScale = projection.scale();
+
+    
 
     // Pixel display and High DPI monitor scaling
     canvasDpiScaler(canvasEl, context);
@@ -639,8 +646,8 @@ canvas.on('mousedown', function() {
       drawWorld();
     }
 
-  if (!isMobileDevice()) {
-    } // end if (!isMobileDevice())
+  // if (!isMobileDevice()) {
+  //   } // end if (!isMobileDevice())
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);
