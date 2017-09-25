@@ -116,7 +116,7 @@ function dataLoaded(error, data) {
                         .center(focusPoint)
                         .radius(kmsToRadius(currentRangeInKms));
 
-  // Preload ABC Sans - maybe only works on desktop
+  // Try to preload ABC Sans
   context.beginPath();
   context.fillStyle = 'rgba(0,0,0,1.0)';
   context.font = `700 18px ABCSans`;
@@ -319,7 +319,7 @@ function dataLoaded(error, data) {
               context.fill();
 
               context.fillStyle = 'white';
-              context.textAlign = "left";
+              context.textAlign = 'left';
               context.fillText(
                 labelName,
                 markerLongitude - (labelWidth) / 2,
@@ -347,7 +347,7 @@ function dataLoaded(error, data) {
               context.fillStyle = 'black';
               context.fill();
 
-              context.textAlign = "left";
+              context.textAlign = 'left';
               context.fillStyle = 'white';
               context.fillText(
                 labelName,
@@ -557,24 +557,19 @@ function dataLoaded(error, data) {
 
 
 canvas.on('mousedown', function() {
-    console.log(d3.mouse(this));
     dragstarted(this);
-    // If there's exactly one finger inside this element
-    // if (event.targetTouches.length == 2) {
-    //   // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
-    //   // dragstarted(canvas);
 
-    //   // console.log('hhello');
+    canvas.on('mousemove', function () {
+      dragged(this);
+    }, false);
+  
+    canvas.on('mouseup', function() {
+      dragged(this);
+      canvas.on('mousemove', null);
+    }, false);
 
-
-    // }
   }, false);
 
-  canvas.on('mouseup', function() {
-    console.log(d3.mouse(this));
-    dragged(this);
- 
-  }, false);
 
 
 
