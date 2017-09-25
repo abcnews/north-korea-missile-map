@@ -35,7 +35,7 @@ if (window.innerHeight > window.innerWidth) {
 
 setMargins();
 
-let focusPoint = [125.7625, 39.0392], // Pyongyang, North Korea
+let focusPoint = [],
     launchCountryCode = 408,
     launchDotRadius = 60,
     tweenRange = 0;
@@ -69,7 +69,7 @@ function dataLoaded(error, data) {
   }
 
   // Set original first marker values manually for now
-  let currentLocationId = "pyongyang",
+  let currentLocationId = "northkorea",
       currentRangeInKms = 0,
       previousRangeInKms = 0,
       currentLabels = null;
@@ -106,7 +106,7 @@ function dataLoaded(error, data) {
 
   // Draw the initial Globe
 
-  const initialPoint = getItem('pyongyang').longlat;
+  const initialPoint = getItem('northkorea').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
   const geoCircle = d3.geoCircle().center(focusPoint);
@@ -601,10 +601,7 @@ canvas.on('mousedown', function() {
   // d3.select('canvas').call(drag
   //   .on("start", dragstarted)
   //   .on("drag", dragged));
-    
-    
 
-      
 
       function dragstarted(el) {
         

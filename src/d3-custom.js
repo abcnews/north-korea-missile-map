@@ -1,3 +1,6 @@
+// Note: this is to modularise d3 but it looks like d3.events wasn't working
+// with selection in the right scope so we are just importing all of d3 now
+
 import * as selection from 'd3-selection';
 import * as geo from 'd3-geo';
 import * as transition from 'd3-transition';

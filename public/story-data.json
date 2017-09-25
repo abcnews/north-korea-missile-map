@@ -119,6 +119,11 @@
       "id": "seoul",
       "name": "Seoul",
       "longlat": [126.992971, 37.550320]
+    },
+    {
+      "id": "northkorea",
+      "name": "North Korea",
+      "longlat": [127.13079622089599, 40.12946906817838]
     }
   ]
 }
