@@ -153,11 +153,35 @@ function dataLoaded(error, data) {
 
     // if (drawDetailed) {
       // Draw landmass
+      // context.beginPath();
+      // context.strokeStyle = landStrokeColor;
+      // context.fillStyle = 'white';
+      // context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+      // path(landDetail);
+      // context.fill();
+      // context.stroke();
+
+      // // Draw outline of countries
+      // context.beginPath();
+      // context.strokeStyle = landStrokeColor;
+      // context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+      // path(bordersDetail);
+      // context.stroke();
+
+      // // Draw launch country
+      // context.beginPath();
+      // context.fillStyle = launchCountryColor;
+      // path(countriesDetail.find(item => item.id === launchCountryCode));
+      // context.fill();
+    // } 
+
+    // else {
+      // Draw landmass
       context.beginPath();
       context.strokeStyle = landStrokeColor;
       context.fillStyle = 'white';
       context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      path(landDetail);
+      path(land);
       context.fill();
       context.stroke();
 
@@ -165,38 +189,14 @@ function dataLoaded(error, data) {
       context.beginPath();
       context.strokeStyle = landStrokeColor;
       context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      path(bordersDetail);
+      path(borders);
       context.stroke();
 
       // Draw launch country
       context.beginPath();
       context.fillStyle = launchCountryColor;
-      path(countriesDetail.find(item => item.id === launchCountryCode));
+      path(countries.find(item => item.id === launchCountryCode));
       context.fill();
-    // } 
-
-    // else {
-    //   // Draw landmass
-    //   context.beginPath();
-    //   context.strokeStyle = landStrokeColor;
-    //   context.fillStyle = 'white';
-    //   context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-    //   path(land);
-    //   context.fill();
-    //   context.stroke();
-
-    //   // Draw outline of countries
-    //   context.beginPath();
-    //   context.strokeStyle = landStrokeColor;
-    //   context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-    //   path(borders);
-    //   context.stroke();
-
-    //   // Draw launch country
-    //   context.beginPath();
-    //   context.fillStyle = launchCountryColor;
-    //   path(countries.find(item => item.id === launchCountryCode));
-    //   context.fill();
     // }
 
 
@@ -471,9 +471,9 @@ function dataLoaded(error, data) {
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
 
           return function (time) {
-            // Draw detailed if stationary
-            if (time > 0) drawDetailed = false;
-            if (time === 1) drawDetailed = true;
+            // // Draw detailed if stationary
+            // if (time > 0) drawDetailed = false;
+            // if (time === 1) drawDetailed = true;
 
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
@@ -546,9 +546,9 @@ function dataLoaded(error, data) {
                                                   newGlobeScale);
 
             return function (time) {
-              // Draw detailed if stationary
-              if (time > 0) drawDetailed = false;
-              if (time === 1) drawDetailed = true;
+              // // Draw detailed if stationary
+              // if (time > 0) drawDetailed = false;
+              // if (time === 1) drawDetailed = true;
 
               projection.scale(scaleInterpolate(time));
               drawWorld();
