@@ -11,6 +11,9 @@ const styles = require('./Globe.scss');
 
 const abcBackgroundColor = "#f9f9f9";
 
+// For rotation timer to work
+let t0 = Date.now();
+
 let mark, // Widen scope so we can unmount event listeners?
     resizeCanvas; // Is there a better way to do this? Probably
 
@@ -26,6 +29,7 @@ let screenWidth = window.innerWidth,
     landStrokeWidth = 0.4,
     pointRadius = 6,
     pointLineWidth = 2,
+    radiusStrokeWidth = 3,
     transitionDuration = 1300,
     isLandscape = true;
     // drawDetailed = false;
@@ -46,7 +50,6 @@ let focusPoint = [],
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
 const geojsonUrl = placeholder.dataset.geojson;
-// const geojsonDetailUrl = placeholder.dataset.geojsondetail;
 const storyDataUrl = placeholder.dataset.storydata;
 
 
@@ -58,18 +61,12 @@ function dataLoaded(error, data) {
 
   const worldMap = data[0],
         storyData = data[1];
-        // detailedMap = data[2];
 
 
   const land = topojson.feature(worldMap, worldMap.objects.land),
   countries = topojson.feature(worldMap, worldMap.objects.countries).features,
   borders = topojson.mesh(worldMap, worldMap.objects.countries,  function(a, b) { return a !== b; } ),
   globe = {type: "Sphere"};
-
-  
-    // const landDetail = topojson.feature(detailedMap, detailedMap.objects.land),
-    // countriesDetail = topojson.feature(detailedMap, detailedMap.objects.countries).features,
-    // bordersDetail = topojson.mesh(detailedMap, detailedMap.objects.countries, function(a, b) { return a !== b; } );
  
 
   // Set launch/focus point to the centre of North Korea
@@ -94,6 +91,8 @@ function dataLoaded(error, data) {
     .fitExtent([[margins,margins], [screenWidth -margins, screenHeight -margins]], globe);
 
   initialGlobeScale = projection.scale();
+
+  console.log(initialGlobeScale);
 
   const base = d3.select('#globe #map');
 
@@ -141,7 +140,6 @@ function dataLoaded(error, data) {
 
   // Clear and render a frame of each part of the globe
   function drawWorld(label) {
-
     // Clear the canvas ready for redraw
     context.clearRect(0, 0, screenWidth, screenHeight);
 
@@ -152,31 +150,7 @@ function dataLoaded(error, data) {
     context.fill();
 
 
-    // if (drawDetailed) {
-      // Draw landmass
-      // context.beginPath();
-      // context.strokeStyle = landStrokeColor;
-      // context.fillStyle = 'white';
-      // context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      // path(landDetail);
-      // context.fill();
-      // context.stroke();
 
-      // // Draw outline of countries
-      // context.beginPath();
-      // context.strokeStyle = landStrokeColor;
-      // context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      // path(bordersDetail);
-      // context.stroke();
-
-      // // Draw launch country
-      // context.beginPath();
-      // context.fillStyle = launchCountryColor;
-      // path(countriesDetail.find(item => item.id === launchCountryCode));
-      // context.fill();
-    // } 
-
-    // else {
       // Draw landmass
       context.beginPath();
       context.strokeStyle = landStrokeColor;
@@ -198,10 +172,6 @@ function dataLoaded(error, data) {
       context.fillStyle = launchCountryColor;
       path(countries.find(item => item.id === launchCountryCode));
       context.fill();
-    // }
-
-
-
 
 
     // Draw circle launch radius
@@ -209,7 +179,7 @@ function dataLoaded(error, data) {
     context.strokeStyle = "#FF6100";
     context.globalAlpha = 0.1;
     context.fillStyle = '#FF4D00'
-    context.lineWidth = 3; //screenWidth < 700 ? 2 : 3;
+    context.lineWidth = radiusStrokeWidth; //screenWidth < 700 ? 2 : 3;
     path(rangeCircle());
     context.fill();
     context.globalAlpha = 1;
@@ -472,10 +442,6 @@ function dataLoaded(error, data) {
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
 
           return function (time) {
-            // // Draw detailed if stationary
-            // if (time > 0) drawDetailed = false;
-            // if (time === 1) drawDetailed = true;
-
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
             tweenRange = rangeDisplay(time);
@@ -547,10 +513,6 @@ function dataLoaded(error, data) {
                                                   newGlobeScale);
 
             return function (time) {
-              // // Draw detailed if stationary
-              // if (time > 0) drawDetailed = false;
-              // if (time === 1) drawDetailed = true;
-
               projection.scale(scaleInterpolate(time));
               drawWorld();
             }
@@ -583,10 +545,12 @@ function dataLoaded(error, data) {
                 [margins, margins], 
                 [screenWidth -margins, screenHeight -margins]], 
                  globe);
-
-    projection.scale(projection.scale() * globeScale / 100);
-
+    
+    // Reset the initial global scale for resized full globe
     initialGlobeScale = projection.scale();
+
+    // Then zoom in to globe scale if necessary
+    projection.scale(projection.scale() * globeScale / 100);
 
 
     // Pixel display and High DPI monitor scaling
@@ -594,6 +558,16 @@ function dataLoaded(error, data) {
 
     drawWorld();
   }
+
+  // Experimental idea to show ranges by rotating
+  // Probably a silly idea
+  // const fps = 25;
+  // Rotate ALL the paths
+  // d3.interval(function() {
+  //   var t = Date.now() - t0;
+  //   projection.rotate([0.001 * t, 0]);
+  //   drawWorld();
+  // }, 1000 / fps);
 
 
   // Experimental feature to allow click and drag
@@ -606,10 +580,7 @@ function dataLoaded(error, data) {
     r0, // Projection rotation as Euler angles at start.
     q0; // Projection rotation as versor at start.
 
-  // Click and drag disable for now because can't scroll on touch devices
-  // Detect media and disable
-  // let drag = d3.drag();
-
+  // Disable on IE and Edge because they can't detect touch events by default
   if (!detectIE()) {
     canvas.on('mousedown', function() {
       if (d3.event.which === 1) {
@@ -641,40 +612,32 @@ function dataLoaded(error, data) {
         canvas.on('touchend', function() {
             canvas.on('touchmove', null);
         });
-
       }
     });
-  }
+
+  } // end if detectIE()
 
 
-
-  // Original method. Need to modify to allow scroll in mobile.
-  // d3.select('canvas').call(drag
-  //   .on("start", dragstarted)
-  //   .on("drag", dragged));
-
-
-      function dragStarted(el) {
-          v0 = versor.cartesian(projection.invert(d3.mouse(el)));
-          r0 = projection.rotate();
-          q0 = versor(r0);
-        
-      }
-
-      function dragged(el) {
-        var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(el))),
-            q1 = versor.multiply(q0, versor.delta(v0, v1)),
-            r1 = versor.rotation(q1);
-        projection.rotate(r1);
-        drawWorld();
-      }
-
-      // Handle touches differently to avoid jitter on two fingers
-      function touchDragStarted(el) {
-        v0 = versor.cartesian(projection.invert(d3.touches(el)[0]));
+    function dragStarted(el) {
+        v0 = versor.cartesian(projection.invert(d3.mouse(el)));
         r0 = projection.rotate();
         q0 = versor(r0);
       
+    }
+
+    function dragged(el) {
+      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(el))),
+          q1 = versor.multiply(q0, versor.delta(v0, v1)),
+          r1 = versor.rotation(q1);
+      projection.rotate(r1);
+      drawWorld();
+    }
+
+    // Handle touches differently to avoid jitter on two fingers
+    function touchDragStarted(el) {
+      v0 = versor.cartesian(projection.invert(d3.touches(el)[0]));
+      r0 = projection.rotate();
+      q0 = versor(r0);
     }
 
     function touchDragged(el) {
@@ -694,12 +657,10 @@ function dataLoaded(error, data) {
 
 class Globe extends Component {
   componentDidMount() {
-    d3.queue(3) // load a certain number of files concurrently
+    d3.queue(2) // load a certain number of files concurrently
       .defer(d3.json, geojsonUrl)
       .defer(d3.json, storyDataUrl)
-      // .defer(d3.json, geojsonDetailUrl)
       .awaitAll(dataLoaded);
-    // const world = require("./world-data/world-simple.topo.json");
   }
   componentWillUnmount() {
     console.log("Component unmounting remove event listeners etc...");
