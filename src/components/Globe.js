@@ -2,6 +2,7 @@ const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
 const d3 = require('d3'); // Requiring all due to events not working with modules
+
 // import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
@@ -22,7 +23,7 @@ let screenWidth = window.innerWidth,
     pointFill = "#FF6100",
     pointStroke = "white",
     landStrokeColor = "#1D3C43",
-    landStrokeWidth = 0.5,
+    landStrokeWidth = 0.4,
     pointRadius = 6,
     pointLineWidth = 2,
     transitionDuration = 1300,
@@ -585,9 +586,8 @@ function dataLoaded(error, data) {
 
     projection.scale(projection.scale() * globeScale / 100);
 
-    // initialGlobeScale = projection.scale();
+    initialGlobeScale = projection.scale();
 
-    
 
     // Pixel display and High DPI monitor scaling
     canvasDpiScaler(canvasEl, context);
@@ -612,41 +612,34 @@ function dataLoaded(error, data) {
 
   if (!detectIE()) {
     canvas.on('mousedown', function() {
-      dragStarted(this);
+      if (d3.event.which === 1) {
+        dragStarted(this);
 
-      canvas.on('mousemove', function () {
-        dragged(this);
-      }, false);
+        canvas.on('mousemove', function () {
+          dragged(this);
+        }, false);
 
-      canvas.on('mouseup', function() {
-        dragged(this);
-        canvas.on('mousemove', null);
-      }, false);
+        canvas.on('mouseup', function() {
+          canvas.on('mousemove', null);
+        }, false);
+      }
 
     }, false);
 
 
 
     canvas.on('touchstart', function() {
-      let that = this;
-      // If there's exactly one finger inside this element
-      if (event.targetTouches.length === 2) {
+      if (d3.event.targetTouches.length === 2) {
         // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
-        // dragstarted(canvas);
-        // allowRotate = true;
         touchDragStarted(this);
-        event.preventDefault();
+        d3.event.preventDefault();
 
         canvas.on('touchmove', function () {
           touchDragged(this);
         }, false);
 
         canvas.on('touchend', function() {
-          // if (allowRotate) {
-            // touchDragged(this); // Not needed and it creates jumpiness anyway
             canvas.on('touchmove', null);
-          // }
-            // allowRotate = false;
         });
 
       }
@@ -692,8 +685,6 @@ function dataLoaded(error, data) {
       drawWorld();
     }
 
-  // if (!isMobileDevice()) {
-  //   } // end if (!isMobileDevice())
 
   // Add event listener for our marks
   document.addEventListener('mark', mark);
