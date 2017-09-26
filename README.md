@@ -1,6 +1,17 @@
-# north-korea-missile-map
+Missile Map
+===========
 
-A project generated from [aunty](https://github.com/abcnews/aunty)'s `preact-app` template.
+Generate a [D3(http://d3js.org/)] spinning globe on canvas and animate it using scrollyteller waypoints.
+
+A project generated from [aunty](http://github.com/abcnews/aunty)'s `preact-app` template.
+
+Depends on [Odyssey Scrollyteller](https://github.com/abcnews/odyssey-scrollyteller) and ABC's Odyssey Template (on internal Stash).
+
+## Configuration
+
+Generate marker waypoints in CoreMedia with hashes like `#markIDnorthkoreaRANGE1000LABELguam`
+
+Needs a JSON data file with your coordinates and names etc.
 
 ## Authors
 
