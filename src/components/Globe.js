@@ -27,6 +27,7 @@ let screenWidth = window.innerWidth,
     pointLineWidth = 2,
     transitionDuration = 1300,
     isLandscape = true;
+    // drawDetailed = false;
     
 if (window.innerHeight > window.innerWidth) {
   isLandscape = !isLandscape;
@@ -44,6 +45,7 @@ let focusPoint = [],
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
 const geojsonUrl = placeholder.dataset.geojson;
+// const geojsonDetailUrl = placeholder.dataset.geojsondetail;
 const storyDataUrl = placeholder.dataset.storydata;
 
 
@@ -55,11 +57,19 @@ function dataLoaded(error, data) {
 
   const worldMap = data[0],
         storyData = data[1];
+        // detailedMap = data[2];
+
 
   const land = topojson.feature(worldMap, worldMap.objects.land),
   countries = topojson.feature(worldMap, worldMap.objects.countries).features,
   borders = topojson.mesh(worldMap, worldMap.objects.countries,  function(a, b) { return a !== b; } ),
   globe = {type: "Sphere"};
+
+  
+    // const landDetail = topojson.feature(detailedMap, detailedMap.objects.land),
+    // countriesDetail = topojson.feature(detailedMap, detailedMap.objects.countries).features,
+    // bordersDetail = topojson.mesh(detailedMap, detailedMap.objects.countries, function(a, b) { return a !== b; } );
+ 
 
   // Set launch/focus point to the centre of North Korea
   focusPoint = d3.geoCentroid(countries.find(item => item.id === launchCountryCode));
@@ -140,27 +150,57 @@ function dataLoaded(error, data) {
     path(globe);
     context.fill();
 
-    // Draw landmass
-    context.beginPath();
-    context.strokeStyle = landStrokeColor;
-    context.fillStyle = 'white';
-    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-    path(land);
-    context.fill();
-    context.stroke();
 
-    // Draw outline of countries
-    context.beginPath();
-    context.strokeStyle = landStrokeColor;
-    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-    path(borders);
-    context.stroke();
+    // if (drawDetailed) {
+      // Draw landmass
+      context.beginPath();
+      context.strokeStyle = landStrokeColor;
+      context.fillStyle = 'white';
+      context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+      path(landDetail);
+      context.fill();
+      context.stroke();
 
-    // Draw launch country
-    context.beginPath();
-    context.fillStyle = launchCountryColor;
-    path(countries.find(item => item.id === launchCountryCode));
-    context.fill();
+      // Draw outline of countries
+      context.beginPath();
+      context.strokeStyle = landStrokeColor;
+      context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+      path(bordersDetail);
+      context.stroke();
+
+      // Draw launch country
+      context.beginPath();
+      context.fillStyle = launchCountryColor;
+      path(countriesDetail.find(item => item.id === launchCountryCode));
+      context.fill();
+    // } 
+
+    // else {
+    //   // Draw landmass
+    //   context.beginPath();
+    //   context.strokeStyle = landStrokeColor;
+    //   context.fillStyle = 'white';
+    //   context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    //   path(land);
+    //   context.fill();
+    //   context.stroke();
+
+    //   // Draw outline of countries
+    //   context.beginPath();
+    //   context.strokeStyle = landStrokeColor;
+    //   context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    //   path(borders);
+    //   context.stroke();
+
+    //   // Draw launch country
+    //   context.beginPath();
+    //   context.fillStyle = launchCountryColor;
+    //   path(countries.find(item => item.id === launchCountryCode));
+    //   context.fill();
+    // }
+
+
+
 
 
     // Draw circle launch radius
@@ -431,6 +471,9 @@ function dataLoaded(error, data) {
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
 
           return function (time) {
+            // Draw detailed if stationary
+            if (time > 0) drawDetailed = false;
+            if (time === 1) drawDetailed = true;
 
             projection.rotate(rotationInterpolate(time));
             rangeCircle.radius(radiusInterpolate(time));
@@ -503,7 +546,10 @@ function dataLoaded(error, data) {
                                                   newGlobeScale);
 
             return function (time) {
-            
+              // Draw detailed if stationary
+              if (time > 0) drawDetailed = false;
+              if (time === 1) drawDetailed = true;
+
               projection.scale(scaleInterpolate(time));
               drawWorld();
             }
@@ -564,50 +610,50 @@ function dataLoaded(error, data) {
   // Detect media and disable
   // let drag = d3.drag();
 
+  if (!detectIE()) {
+    canvas.on('mousedown', function() {
+      dragStarted(this);
 
-// canvas.on('mousedown', function() {
-//     dragStarted(this);
+      canvas.on('mousemove', function () {
+        dragged(this);
+      }, false);
 
-//     canvas.on('mousemove', function () {
-//       dragged(this);
-//     }, false);
+      canvas.on('mouseup', function() {
+        dragged(this);
+        canvas.on('mousemove', null);
+      }, false);
 
-//     canvas.on('mouseup', function() {
-//       dragged(this);
-//       canvas.on('mousemove', null);
-//     }, false);
-
-//   }, false);
-
-
+    }, false);
 
 
-  // canvas.on('touchstart', function() {
-  //   let that = this;
-  //   // If there's exactly one finger inside this element
-  //   if (event.targetTouches.length === 2) {
-  //     // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
-  //     // dragstarted(canvas);
-  //     // allowRotate = true;
-  //     touchDragStarted(this);
-  //     event.preventDefault();
 
-  //     canvas.on('touchmove', function () {
-  //       touchDragged(this);
-  //     }, false);
+    canvas.on('touchstart', function() {
+      let that = this;
+      // If there's exactly one finger inside this element
+      if (event.targetTouches.length === 2) {
+        // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
+        // dragstarted(canvas);
+        // allowRotate = true;
+        touchDragStarted(this);
+        event.preventDefault();
 
-  //     canvas.on('touchend', function() {
-  //       // if (allowRotate) {
-  //         // touchDragged(this); // Not needed and it creates jumpiness anyway
-  //         canvas.on('touchmove', null);
-  //       // }
-  //         // allowRotate = false;
-  //     });
+        canvas.on('touchmove', function () {
+          touchDragged(this);
+        }, false);
 
-  //   }
-  // });
+        canvas.on('touchend', function() {
+          // if (allowRotate) {
+            // touchDragged(this); // Not needed and it creates jumpiness anyway
+            canvas.on('touchmove', null);
+          // }
+            // allowRotate = false;
+        });
 
-  
+      }
+    });
+  }
+
+
 
   // Original method. Need to modify to allow scroll in mobile.
   // d3.select('canvas').call(drag
@@ -657,9 +703,10 @@ function dataLoaded(error, data) {
 
 class Globe extends Component {
   componentDidMount() {
-    d3.queue(2) // load a certain number of files concurrently
+    d3.queue(3) // load a certain number of files concurrently
       .defer(d3.json, geojsonUrl)
       .defer(d3.json, storyDataUrl)
+      // .defer(d3.json, geojsonDetailUrl)
       .awaitAll(dataLoaded);
     // const world = require("./world-data/world-simple.topo.json");
   }
@@ -706,6 +753,51 @@ function isInt(value) {
   }
   var x = parseFloat(value);
   return (x | 0) === x;
+}
+
+
+/**
+ * detect IE
+ * returns version of IE or false, if browser is not Internet Explorer
+ */
+function detectIE() {
+  var ua = window.navigator.userAgent;
+
+  // Test values; Uncomment to check result …
+
+  // IE 10
+  // ua = 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)';
+  
+  // IE 11
+  // ua = 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko';
+  
+  // Edge 12 (Spartan)
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0';
+  
+  // Edge 13
+  // ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586';
+
+  var msie = ua.indexOf('MSIE ');
+  if (msie > 0) {
+    // IE 10 or older => return version number
+    return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+  }
+
+  var trident = ua.indexOf('Trident/');
+  if (trident > 0) {
+    // IE 11 => return version number
+    var rv = ua.indexOf('rv:');
+    return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+  }
+
+  var edge = ua.indexOf('Edge/');
+  if (edge > 0) {
+    // Edge (IE 12+) => return version number
+    return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+  }
+
+  // other browser
+  return false;
 }
 
 
