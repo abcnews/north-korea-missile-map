@@ -25,8 +25,8 @@ let screenWidth = window.innerWidth,
     launchCountryColor = "#21849B",
     pointFill = "#FF6100",
     pointStroke = "white",
-    landStrokeColor = "#1D3C43",
-    landStrokeWidth = 0.4,
+    landStrokeColor = "rgba(29,60,67,0.5)",
+    landStrokeWidth = 1.1,
     pointRadius = 6,
     pointLineWidth = 2,
     radiusStrokeWidth = 3,
@@ -91,8 +91,6 @@ function dataLoaded(error, data) {
     .fitExtent([[margins,margins], [screenWidth -margins, screenHeight -margins]], globe);
 
   initialGlobeScale = projection.scale();
-
-  console.log(initialGlobeScale);
 
   const base = d3.select('#globe #map');
 
@@ -561,11 +559,11 @@ function dataLoaded(error, data) {
 
   // Experimental idea to show ranges by rotating
   // Probably a silly idea
-  // const fps = 25;
-  // Rotate ALL the paths
-  // d3.interval(function() {
-  //   var t = Date.now() - t0;
-  //   projection.rotate([0.001 * t, 0]);
+  
+  // const fps = 10;
+ 
+  // d3.interval(function(elapsed) {
+  //   projection.rotate([projection.rotate()[0] + projection.rotate()[0] / 1000, projection.rotate()[1], projection.rotate()[2]]);
   //   drawWorld();
   // }, 1000 / fps);
 
