@@ -33,7 +33,7 @@ let screenWidth = window.innerWidth,
     transitionDuration = 1300,
     isLandscape = true;
     // drawDetailed = false;
-    
+
 if (window.innerHeight > window.innerWidth) {
   isLandscape = !isLandscape;
 }
@@ -521,12 +521,18 @@ function dataLoaded(error, data) {
 
   }; // mark function
 
+  
+
   // Handle screen resizes
-  resizeCanvas = function () {
+  resizeCanvas = function (event) {
+
+    if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 76) {
+      return;
+    }
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
 
-    if(screenHeight > screenWidth){
+    if (screenHeight > screenWidth){
       isLandscape = false;
     } else {
       isLandscape = true;
