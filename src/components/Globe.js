@@ -34,10 +34,17 @@ let screenWidth = window.innerWidth,
     isLandscape = true;
     // drawDetailed = false;
 
-  let activatedElement;
 
-if (window.innerHeight > window.innerWidth) {
+if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
+}
+
+// Override the vewheight vh margins to prevent jumping on mobile scroll changing directions
+let blockArray = document.getElementsByClassName("Block-content");
+for(var i = 0; i < blockArray.length; i++)
+{
+  blockArray[i].style.marginTop = screenHeight / 2 + 'px';
+  blockArray[i].style.marginBottom = screenHeight / 2 + 'px';
 }
 
 
@@ -392,11 +399,6 @@ function dataLoaded(error, data) {
 
 
   mark = function (event) {
-    console.log(event);
-
-    activatedElement = event.detail.activated.element;
-
-
     currentLocationId = event.detail.activated.config.id;
 
     // If more than one LABEL assign directly as array
@@ -533,11 +535,6 @@ function dataLoaded(error, data) {
   // Handle screen resizes
   resizeCanvas = function (event) {
 
-    if (activatedElement) {
-      // get scroll position of activated element and set scroll
-      document.documentElement.scrollTop = document.body.scrollTop = activatedElement.offsetTop;
-    }
-
     if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 76) {
       return;
     }
@@ -600,7 +597,7 @@ function dataLoaded(error, data) {
   if (!detectIE()) {
     canvas.on('mousedown', function() {
 
-      var blockArray = document.getElementsByClassName("Block-content");
+      blockArray = document.getElementsByClassName("Block-content");
       for(var i = 0; i < blockArray.length; i++)
       {
         blockArray[i].className += (" " + styles.noPointer);
