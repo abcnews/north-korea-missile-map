@@ -34,6 +34,9 @@ let screenWidth = window.innerWidth,
     isLandscape = true;
     // drawDetailed = false;
 
+    // to disable multiple tweens
+    let rotating = 1,
+        zooming = 1;
 
 if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
@@ -447,13 +450,19 @@ function dataLoaded(error, data) {
             kmsToRadius(currentRangeInKms)
           );
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
-
-          return function (time) {
-            projection.rotate(rotationInterpolate(time));
-            rangeCircle.radius(radiusInterpolate(time));
-            tweenRange = rangeDisplay(time);
-
-            drawWorld();
+          
+          if (rotating === 1) {
+            return function (time) {
+                projection.rotate(rotationInterpolate(time));
+                rangeCircle.radius(radiusInterpolate(time));
+                tweenRange = rangeDisplay(time);
+              drawWorld();
+              rotating = time;
+            }
+          } else {
+            return function (time) {
+              // don't do much
+          }
           }
         }
       });
@@ -481,11 +490,16 @@ function dataLoaded(error, data) {
           let scaleInterpolate = d3.interpolate(projection.scale(),
                                    newGlobeScale);
 
-          return function (time) {
-          
-            projection.scale(scaleInterpolate(time));
-            
-            drawWorld();
+          if (zooming === 1) {
+            return function (time) {
+              projection.scale(scaleInterpolate(time));
+              drawWorld();
+              zooming = time;
+            }
+          } else {
+            return function (time) {
+              // Don't do much
+            }
           }
         }
       })
@@ -502,11 +516,16 @@ function dataLoaded(error, data) {
             let scaleInterpolate = d3.interpolate(projection.scale(),
               initialGlobeScale);
 
-            return function (time) {
-            
-              projection.scale(scaleInterpolate(time));
-              
-              drawWorld();
+            if (zooming === 1) {
+              return function (time) {
+                projection.scale(scaleInterpolate(time));
+                drawWorld();
+                zooming = time;
+              }
+            } else {
+              return function (time) {
+                // Don't do much
+              }
             }
           }
         })
