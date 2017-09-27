@@ -34,6 +34,8 @@ let screenWidth = window.innerWidth,
     isLandscape = true;
     // drawDetailed = false;
 
+  let activatedElement;
+
 if (window.innerHeight > window.innerWidth) {
   isLandscape = !isLandscape;
 }
@@ -390,6 +392,11 @@ function dataLoaded(error, data) {
 
 
   mark = function (event) {
+    console.log(event);
+
+    activatedElement = event.detail.activated.element;
+
+
     currentLocationId = event.detail.activated.config.id;
 
     // If more than one LABEL assign directly as array
@@ -525,6 +532,11 @@ function dataLoaded(error, data) {
 
   // Handle screen resizes
   resizeCanvas = function (event) {
+
+    if (activatedElement) {
+      // get scroll position of activated element and set scroll
+      document.documentElement.scrollTop = document.body.scrollTop = activatedElement.offsetTop;
+    }
 
     if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 76) {
       return;
