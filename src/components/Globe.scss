@@ -24,3 +24,7 @@
   // left: 0;
   // top: 0;
 }
+
+.no-pointer {
+  pointer-events: none !important;
+}

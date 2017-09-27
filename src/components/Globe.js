@@ -581,6 +581,13 @@ function dataLoaded(error, data) {
   // Disable on IE and Edge because they can't detect touch events by default
   if (!detectIE()) {
     canvas.on('mousedown', function() {
+
+      var blockArray = document.getElementsByClassName("Block-content");
+      for(var i = 0; i < blockArray.length; i++)
+      {
+        blockArray[i].className += (" " + styles.noPointer);
+      }
+
       if (d3.event.which === 1) {
         dragStarted(this);
 
@@ -589,6 +596,10 @@ function dataLoaded(error, data) {
         }, false);
 
         canvas.on('mouseup', function() {
+          for(var i = 0; i < blockArray.length; i++)
+          {
+            blockArray[i].classList.remove(styles.noPointer);
+          }
           canvas.on('mousemove', null);
         }, false);
       }
