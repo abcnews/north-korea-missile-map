@@ -38,7 +38,10 @@
 // A few global overrides to make things look nice
 :global {
   .Block-content:last-child {
-    margin-bottom: 100vh !important; 
+    margin-bottom: 100vh !important; // seems to override
+  }
+  .Block-content:first-child {
+    margin-top: 100vh !important; // seems to not override ¯\_(ツ)_/¯
   }
   .Block.is-richtext,
   .scrollyteller-stage {

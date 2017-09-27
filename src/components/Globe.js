@@ -49,7 +49,8 @@ for(var i = 0; i < blockArray.length; i++)
   blockArray[i].style.marginTop = screenHeight / 2 + 'px';
   blockArray[i].style.marginBottom = screenHeight / 2 + 'px';
 }
-
+blockArray[0].style.marginTop = screenHeight + 'px';
+blockArray[blockArray.length - 1].style.marginBottom = screenHeight + 'px';
 
 
 setMargins();
@@ -451,19 +452,14 @@ function dataLoaded(error, data) {
           );
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
           
-          if (rotating === 1) {
             return function (time) {
                 projection.rotate(rotationInterpolate(time));
                 rangeCircle.radius(radiusInterpolate(time));
                 tweenRange = rangeDisplay(time);
-              drawWorld();
-              rotating = time;
-            }
-          } else {
-            return function (time) {
-              // don't do much
-          }
-          }
+                drawWorld();
+                rotating = time;
+                console.log(time);
+              }
         }
       });
 
@@ -490,16 +486,10 @@ function dataLoaded(error, data) {
           let scaleInterpolate = d3.interpolate(projection.scale(),
                                    newGlobeScale);
 
-          if (zooming === 1) {
-            return function (time) {
-              projection.scale(scaleInterpolate(time));
-              drawWorld();
-              zooming = time;
-            }
-          } else {
-            return function (time) {
-              // Don't do much
-            }
+          return function (time) {
+            projection.scale(scaleInterpolate(time));
+            drawWorld();
+            zooming = time;
           }
         }
       })
@@ -516,16 +506,10 @@ function dataLoaded(error, data) {
             let scaleInterpolate = d3.interpolate(projection.scale(),
               initialGlobeScale);
 
-            if (zooming === 1) {
-              return function (time) {
-                projection.scale(scaleInterpolate(time));
-                drawWorld();
-                zooming = time;
-              }
-            } else {
-              return function (time) {
-                // Don't do much
-              }
+            return function (time) {
+              projection.scale(scaleInterpolate(time));
+              drawWorld();
+              zooming = time;
             }
           }
         })
