@@ -602,6 +602,15 @@ function dataLoaded(error, data) {
           }
           canvas.on('mousemove', null);
         }, false);
+
+        canvas.on('mouseout', function() {
+          for(var i = 0; i < blockArray.length; i++)
+          {
+            blockArray[i].classList.remove(styles.noPointer);
+          }
+          canvas.on('mousemove', null);
+        }, false);
+
       }
 
     }, false);

@@ -25,6 +25,7 @@
   // top: 0;
 }
 
+// For click and drag to work over Block content paragraphs
 .no-pointer {
   pointer-events: none !important;
 }
