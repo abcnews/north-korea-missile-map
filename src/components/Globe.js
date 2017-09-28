@@ -1,9 +1,9 @@
 const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
-const d3 = require('d3'); // Requiring all due to events not working with modules
-
-// import d3 from '../d3-custom'; // Modularise D3
+// const d3 = require('d3'); // Requiring all due to events not working with modules
+const select = require('d3-selection');
+import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
 
@@ -102,7 +102,7 @@ function dataLoaded(error, data) {
 
   initialGlobeScale = projection.scale();
 
-  const base = d3.select('#globe #map');
+  const base = select.select('#globe #map');
 
   const canvas = base.append('canvas')
     .classed(styles.scalingGlobe, true)
@@ -433,7 +433,7 @@ function dataLoaded(error, data) {
     const dummyRotate = {},
           dummyZoom = {};
 
-    d3.select(dummyRotate).transition('rotateTransition')
+    select.select(dummyRotate).transition('rotateTransition')
       .delay(0)
       .duration(transitionDuration)
       .tween("rotate", function() {
@@ -470,13 +470,13 @@ function dataLoaded(error, data) {
     shouldZoomOut ? zoomOutFirst() : zoomDirect();
 
     function zoomDirect() {
-      d3.select(dummyZoom).transition()
+      select.select(dummyZoom).transition()
       .duration(transitionDuration)
       .tween("zoom", function() {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat;
         if (p) {
-          
+
           let scaleInterpolate = d3.interpolate(projection.scale(),
                                    newGlobeScale);
 
@@ -489,7 +489,7 @@ function dataLoaded(error, data) {
     }
 
     function zoomOutFirst() {
-      d3.select(dummyZoom).transition()
+      select.select(dummyZoom).transition()
         .duration(transitionDuration / 2 + 300)
         .tween("zoom", function() {
           if (!currentLocationId) return;
@@ -598,7 +598,7 @@ function dataLoaded(error, data) {
         blockArray[i].className += (" " + styles.noPointer);
       }
 
-      if (d3.event.which === 1) {
+      if (select.event.which === 1) {
         dragStarted(this);
 
         canvas.on('mousemove', function () {
@@ -628,10 +628,10 @@ function dataLoaded(error, data) {
 
 
     canvas.on('touchstart', function() {
-      if (d3.event.targetTouches.length === 2) {
+      if (select.event.targetTouches.length === 2) {
         // Complete 2 finger touch logic here from https://www.html5rocks.com/en/mobile/touch/
         touchDragStarted(this);
-        d3.event.preventDefault();
+        select.event.preventDefault();
 
         canvas.on('touchmove', function () {
           touchDragged(this);
@@ -647,14 +647,14 @@ function dataLoaded(error, data) {
 
 
     function dragStarted(el) {
-        v0 = versor.cartesian(projection.invert(d3.mouse(el)));
+        v0 = versor.cartesian(projection.invert(select.mouse(el)));
         r0 = projection.rotate();
         q0 = versor(r0);
       
     }
 
     function dragged(el) {
-      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(el))),
+      var v1 = versor.cartesian(projection.rotate(r0).invert(select.mouse(el))),
           q1 = versor.multiply(q0, versor.delta(v0, v1)),
           r1 = versor.rotation(q1);
       projection.rotate(r1);
@@ -663,13 +663,13 @@ function dataLoaded(error, data) {
 
     // Handle touches differently to avoid jitter on two fingers
     function touchDragStarted(el) {
-      v0 = versor.cartesian(projection.invert(d3.touches(el)[0]));
+      v0 = versor.cartesian(projection.invert(select.touches(el)[0]));
       r0 = projection.rotate();
       q0 = versor(r0);
     }
 
     function touchDragged(el) {
-      var v1 = versor.cartesian(projection.rotate(r0).invert(d3.touches(el)[0])),
+      var v1 = versor.cartesian(projection.rotate(r0).invert(select.touches(el)[0])),
           q1 = versor.multiply(q0, versor.delta(v0, v1)),
           r1 = versor.rotation(q1);
       projection.rotate(r1);
