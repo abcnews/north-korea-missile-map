@@ -34,9 +34,6 @@ let screenWidth = window.innerWidth,
     isLandscape = true;
     // drawDetailed = false;
 
-    // to disable multiple tweens
-    let rotating = 1,
-        zooming = 1;
 
 if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
@@ -131,7 +128,6 @@ function dataLoaded(error, data) {
   const initialPoint = getItem('northkorea').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
 
-  // const geoCircle = d3.geoCircle().center(focusPoint);
 
 
   const rangeCircle = d3.geoCircle()
@@ -162,27 +158,27 @@ function dataLoaded(error, data) {
 
 
 
-      // Draw landmass
-      context.beginPath();
-      context.strokeStyle = landStrokeColor;
-      context.fillStyle = 'white';
-      context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      path(land);
-      context.fill();
-      context.stroke();
+    // Draw landmass
+    context.beginPath();
+    context.strokeStyle = landStrokeColor;
+    context.fillStyle = 'white';
+    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    path(land);
+    context.fill();
+    context.stroke();
 
-      // Draw outline of countries
-      context.beginPath();
-      context.strokeStyle = landStrokeColor;
-      context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
-      path(borders);
-      context.stroke();
+    // Draw outline of countries
+    context.beginPath();
+    context.strokeStyle = landStrokeColor;
+    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    path(borders);
+    context.stroke();
 
-      // Draw launch country
-      context.beginPath();
-      context.fillStyle = launchCountryColor;
-      path(countries.find(item => item.id === launchCountryCode));
-      context.fill();
+    // Draw launch country
+    context.beginPath();
+    context.fillStyle = launchCountryColor;
+    path(countries.find(item => item.id === launchCountryCode));
+    context.fill();
 
 
     // Draw circle launch radius
@@ -437,7 +433,7 @@ function dataLoaded(error, data) {
     const dummyRotate = {},
           dummyZoom = {};
 
-    d3.select(dummyRotate).transition()
+    d3.select(dummyRotate).transition('rotateTransition')
       .delay(0)
       .duration(transitionDuration)
       .tween("rotate", function() {
@@ -453,12 +449,10 @@ function dataLoaded(error, data) {
           let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
           
             return function (time) {
-                projection.rotate(rotationInterpolate(time));
-                rangeCircle.radius(radiusInterpolate(time));
-                tweenRange = rangeDisplay(time);
-                drawWorld();
-                rotating = time;
-                console.log(time);
+              projection.rotate(rotationInterpolate(time));
+              rangeCircle.radius(radiusInterpolate(time));
+              tweenRange = rangeDisplay(time);
+              drawWorld();
               }
         }
       });
@@ -489,10 +483,9 @@ function dataLoaded(error, data) {
           return function (time) {
             projection.scale(scaleInterpolate(time));
             drawWorld();
-            zooming = time;
           }
         }
-      })
+      });
     }
 
     function zoomOutFirst() {
@@ -509,7 +502,6 @@ function dataLoaded(error, data) {
             return function (time) {
               projection.scale(scaleInterpolate(time));
               drawWorld();
-              zooming = time;
             }
           }
         })
