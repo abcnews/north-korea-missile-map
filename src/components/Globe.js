@@ -30,6 +30,8 @@ let screenWidth = window.innerWidth,
     transitionDuration = 1300,
     isLandscape = true;
 
+let tweening = 0; // Hack to avoid momentary multi-drawWorld
+
 if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
 }
@@ -426,9 +428,11 @@ function dataLoaded(error, data) {
             kmsToRadius(currentRangeInKms)
           );
 
+          // Return the tween function
           return function (time) {
-            if (currentRotation !== [ -p[0], -p[1], 0]) projection.rotate(rotationInterpolate(time));
-            if (previousRangeInKms !== currentRangeInKms) rangeCircle.radius(radiusInterpolate(time));
+            tweening = time; // To detect if redrawing later
+            projection.rotate(rotationInterpolate(time));
+            rangeCircle.radius(radiusInterpolate(time));
             drawWorld();
           }
         }
@@ -486,7 +490,7 @@ function dataLoaded(error, data) {
 
             return function (time) {
               projection.scale(scaleInterpolate(time));
-              drawWorld();
+              if (tweening === 1) drawWorld();
             }
           }
         });
@@ -496,7 +500,7 @@ function dataLoaded(error, data) {
 
 
   // Handle screen resizes
-  resizeCanvas = function (event) {
+  resizeCanvas = (event) => {
 
     if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 76) {
       return;
