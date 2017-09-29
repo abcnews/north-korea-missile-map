@@ -1,8 +1,8 @@
 const {h, Component} = require('preact');
 const topojson = require('topojson');
 const canvasDpiScaler = require('canvas-dpi-scaler');
-// const d3 = require('d3'); // Requiring all due to events not working with modules
-const select = require('d3-selection');
+const select = require('d3-selection'); // For events to work
+
 import d3 from '../d3-custom'; // Modularise D3
 const versor = require('../lib/versor'); // Canvas rotation library
 
@@ -11,16 +11,13 @@ const styles = require('./Globe.scss');
 
 const abcBackgroundColor = "#f9f9f9";
 
-// For rotation timer to work
-let t0 = Date.now();
-
 let mark, // Widen scope so we can unmount event listeners?
     resizeCanvas; // Is there a better way to do this? Probably
 
 let screenWidth = window.innerWidth,
     screenHeight = window.innerHeight,
     initialGlobeScale,
-    globeScale = 100, // as percentage %
+    globeScale = 100, // as percentage
     margins,
     launchCountryColor = "#21849B",
     pointFill = "#FF6100",
@@ -32,15 +29,15 @@ let screenWidth = window.innerWidth,
     radiusStrokeWidth = 3,
     transitionDuration = 1300,
     isLandscape = true;
-    // drawDetailed = false;
-
 
 if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
 }
 
+
 // Override the vewheight vh margins to prevent jumping on mobile scroll changing directions
 let blockArray = document.getElementsByClassName("Block-content");
+
 for(var i = 0; i < blockArray.length; i++)
 {
   blockArray[i].style.marginTop = screenHeight / 2 + 'px';
@@ -48,7 +45,6 @@ for(var i = 0; i < blockArray.length; i++)
 }
 blockArray[0].style.marginTop = screenHeight + 'px';
 blockArray[blockArray.length - 1].style.marginBottom = screenHeight + 'px';
-
 
 setMargins();
 
@@ -124,11 +120,8 @@ function dataLoaded(error, data) {
 
 
   // Render setup
-
   const initialPoint = getItem('northkorea').longlat;
   projection.rotate([ -initialPoint[0], -initialPoint[1] ]);
-
-
 
   const rangeCircle = d3.geoCircle()
                         .center(focusPoint)
@@ -142,7 +135,7 @@ function dataLoaded(error, data) {
   context.font = `700 18px ABCSans`;
   context.fillText('Osaka Seoul ' + String.fromCharCode(8202), 100, 100);
 
-
+  // Draw the inital state of the world
   drawWorld();
 
   // Clear and render a frame of each part of the globe
@@ -155,8 +148,6 @@ function dataLoaded(error, data) {
     context.fillStyle = '#E4EDF0';
     path(globe);
     context.fill();
-
-
 
     // Draw landmass
     context.beginPath();
@@ -180,7 +171,6 @@ function dataLoaded(error, data) {
     path(countries.find(item => item.id === launchCountryCode));
     context.fill();
 
-
     // Draw circle launch radius
     context.beginPath();
     context.strokeStyle = "#FF6100";
@@ -193,7 +183,7 @@ function dataLoaded(error, data) {
     context.stroke();
 
     // Draw a circle outline around the world
-    // First clear any radius 
+    // First clear any radius
     context.beginPath()
     context.strokeStyle = abcBackgroundColor;
     context.lineWidth = 12;
@@ -241,8 +231,6 @@ function dataLoaded(error, data) {
             2 * Math.PI); // Go around the whole circle
           context.fill();
           context.stroke();
-
-
 
           // Draw comparison label text
           
@@ -385,20 +373,10 @@ function dataLoaded(error, data) {
       }, this);
     } // end drawLabels function
 
-
-    // Experimenting with displaying range on canvas
-    // if (currentRangeInKms) {
-    //   context.fillStyle = 'black';
-    //   context.textAlign = "left";
-    //   context.textBaseline = "middle";
-    //   context.fillText(Math.ceil(tweenRange) + 'kms', 100, 100);
-    // }
-
-
   } // end drawWorld function
 
-
-  mark = function (event) {
+  // This function will fire on ever hash mark
+  mark = (event) => {
     currentLocationId = event.detail.activated.config.id;
 
     // If more than one LABEL assign directly as array
@@ -422,7 +400,7 @@ function dataLoaded(error, data) {
     } catch (error) {
       console.log(error);
     }
-    
+
 
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
@@ -440,7 +418,6 @@ function dataLoaded(error, data) {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
-
           let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1] ]);
           let radiusInterpolate = d3.interpolate(
             kmsToRadius(previousRangeInKms), 
@@ -457,16 +434,7 @@ function dataLoaded(error, data) {
         }
       });
 
-
-    // let distanceBetweenRotation = d3.geoDistance(
-    //     getItem(currentLocationId).longlat,
-    //     [
-    //       -projection.rotate()[0],
-    //       -projection.rotate()[1]
-    //     ]
-    //   );
-    //   console.log(distanceBetweenRotation);
-
+    // If #hash ZOOM true in CMS between two points then zoom out first
     shouldZoomOut ? zoomOutFirst() : zoomDirect();
 
     function zoomDirect() {
@@ -521,11 +489,9 @@ function dataLoaded(error, data) {
           }
         });
     }
-
-
   }; // mark function
 
-  
+
 
   // Handle screen resizes
   resizeCanvas = function (event) {
@@ -567,22 +533,9 @@ function dataLoaded(error, data) {
     drawWorld();
   }
 
-  // Experimental idea to show ranges by rotating
-  // Probably a silly idea
-  
-  // const fps = 10;
- 
-  // d3.interval(function(elapsed) {
-  //   projection.rotate([projection.rotate()[0] + projection.rotate()[0] / 1000, projection.rotate()[1], projection.rotate()[2]]);
-  //   drawWorld();
-  // }, 1000 / fps);
 
 
   // Experimental feature to allow click and drag
-  // Need to make work on mobile with two finger drag maybe
-  // Still very rough
-  // let allowRotate = false;
-
   let 
     v0, // Mouse position in Cartesian coordinates at start of drag gesture.
     r0, // Projection rotation as Euler angles at start.
@@ -620,10 +573,9 @@ function dataLoaded(error, data) {
           }
           canvas.on('mousemove', null);
         }, false);
-
       }
 
-    }, false);
+    }, false); // end canvas.on mousedown
 
 
 
@@ -722,9 +674,9 @@ function setMargins() {
 }
 
 
-function isMobileDevice() {
-  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-};
+// function isMobileDevice() {
+//   return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+// };
 
 
 function isInt(value) {
