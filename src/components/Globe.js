@@ -375,6 +375,8 @@ function dataLoaded(error, data) {
 
   } // end drawWorld function
 
+
+
   // This function will fire on ever hash mark
   mark = (event) => {
     currentLocationId = event.detail.activated.config.id;
@@ -418,19 +420,17 @@ function dataLoaded(error, data) {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
         if (p) {
-          let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1] ]);
+          let rotationInterpolate = d3.interpolate(currentRotation, [ -p[0], -p[1], 0]);
           let radiusInterpolate = d3.interpolate(
-            kmsToRadius(previousRangeInKms), 
+            kmsToRadius(previousRangeInKms),
             kmsToRadius(currentRangeInKms)
           );
-          let rangeDisplay = d3.interpolateNumber(previousRangeInKms, currentRangeInKms);
-          
-            return function (time) {
-              projection.rotate(rotationInterpolate(time));
-              rangeCircle.radius(radiusInterpolate(time));
-              tweenRange = rangeDisplay(time);
-              drawWorld();
-              }
+
+          return function (time) {
+            if (currentRotation !== [ -p[0], -p[1], 0]) projection.rotate(rotationInterpolate(time));
+            if (previousRangeInKms !== currentRangeInKms) rangeCircle.radius(radiusInterpolate(time));
+            drawWorld();
+          }
         }
       });
 
@@ -444,13 +444,14 @@ function dataLoaded(error, data) {
         if (!currentLocationId) return;
         var p = getItem(currentLocationId).longlat;
         if (p) {
-
-          let scaleInterpolate = d3.interpolate(projection.scale(),
-                                   newGlobeScale);
+          let previousGlobeScale = projection.scale();
+          let scaleInterpolate = d3.interpolate(
+                previousGlobeScale,
+                newGlobeScale
+            );
 
           return function (time) {
             projection.scale(scaleInterpolate(time));
-            drawWorld();
           }
         }
       });
@@ -463,13 +464,14 @@ function dataLoaded(error, data) {
           if (!currentLocationId) return;
           var p = getItem(currentLocationId).longlat;
           if (p) {
-            
-            let scaleInterpolate = d3.interpolate(projection.scale(),
-              initialGlobeScale);
+            let previousGlobeScale = projection.scale();
+            let scaleInterpolate = d3.interpolate(
+                  previousGlobeScale,
+                  initialGlobeScale
+            );
 
             return function (time) {
               projection.scale(scaleInterpolate(time));
-              drawWorld();
             }
           }
         })
