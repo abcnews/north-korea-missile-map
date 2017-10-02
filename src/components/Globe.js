@@ -42,9 +42,10 @@ let blockArray = document.getElementsByClassName("Block-content");
 
 for(var i = 0; i < blockArray.length; i++)
 {
-  blockArray[i].style.marginTop = screenHeight / 2 + 'px';
-  blockArray[i].style.marginBottom = screenHeight / 2 + 'px';
+  blockArray[i].style.marginTop = screenHeight / 2 + 64 + 'px';
+  blockArray[i].style.marginBottom = screenHeight / 2 + 64 + 'px';
 }
+// Top and bottom have full length margins
 blockArray[0].style.marginTop = screenHeight + 'px';
 blockArray[blockArray.length - 1].style.marginBottom = screenHeight + 'px';
 
@@ -52,14 +53,12 @@ setMargins();
 
 let focusPoint = [],
     launchCountryCode = 408,
-    launchDotRadius = 60,
-    tweenRange = 0;
+    launchDotRadius = 60;
 
 
 const placeholder = document.querySelector('[data-north-korea-missile-range-root]');
 const geojsonUrl = placeholder.dataset.geojson;
 const storyDataUrl = placeholder.dataset.storydata;
-
 
 
 
@@ -133,9 +132,9 @@ function dataLoaded(error, data) {
 
   // Try to preload ABC Sans
   context.beginPath();
-  context.fillStyle = 'rgba(0,0,0,1.0)';
+  context.fillStyle = 'rgba(0,0,0,0.0)';
   context.font = `700 18px ABCSans`;
-  context.fillText('Osaka Seoul ' + String.fromCharCode(8202), 100, 100);
+  context.fillText('Preloading ABC Sans...', 100, 100);
 
   // Draw the inital state of the world
   drawWorld();
@@ -368,7 +367,7 @@ function dataLoaded(error, data) {
                 markerLatitude + fontSize * 1.6 + labelOffset
               );
 
-            }  // end label alternation
+            } // end label alternation
           }
 
         }
@@ -502,7 +501,7 @@ function dataLoaded(error, data) {
   // Handle screen resizes
   resizeCanvas = (event) => {
 
-    if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 76) {
+    if (window.innerHeight < screenHeight && window.innerHeight > screenHeight - 80) {
       return;
     }
     screenWidth = window.innerWidth;
@@ -601,7 +600,7 @@ function dataLoaded(error, data) {
       }
     });
 
-  } // end if detectIE()
+  } // end if detectIE() if block
 
 
     function dragStarted(el) {
@@ -678,11 +677,6 @@ function setMargins() {
     margins = Math.floor(Math.min(screenWidth, screenHeight) * 0.15);
   }
 }
-
-
-// function isMobileDevice() {
-//   return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-// };
 
 
 function isInt(value) {
