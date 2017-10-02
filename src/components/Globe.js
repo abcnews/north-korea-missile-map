@@ -1,4 +1,4 @@
-const { Component } = require("preact");
+const { h, Component } = require("preact");
 const topojson = require("topojson");
 const canvasDpiScaler = require("canvas-dpi-scaler");
 const select = require("d3-selection"); // For events to work
