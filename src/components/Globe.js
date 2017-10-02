@@ -1,4 +1,4 @@
-const { h, Component } = require("preact");
+const { Component } = require("preact");
 const topojson = require("topojson");
 const canvasDpiScaler = require("canvas-dpi-scaler");
 const select = require("d3-selection"); // For events to work
@@ -49,8 +49,7 @@ blockArray[blockArray.length - 1].style.marginBottom = screenHeight + "px";
 setMargins();
 
 let focusPoint = [],
-  launchCountryCode = 408,
-  launchDotRadius = 60;
+  launchCountryCode = 408;
 
 const placeholder = document.querySelector(
   "[data-north-korea-missile-range-root]"
@@ -137,14 +136,14 @@ function dataLoaded(error, data) {
   // Try to preload ABC Sans
   context.beginPath();
   context.fillStyle = "rgba(0,0,0,0.0)";
-  context.font = `700 18px ABCSans`;
+  context.font = "700 18px ABCSans";
   context.fillText("Preloading ABC Sans...", 100, 100);
 
   // Draw the inital state of the world
   drawWorld();
 
   // Clear and render a frame of each part of the globe
-  function drawWorld(label) {
+  function drawWorld() {
     // Clear the canvas ready for redraw
     context.clearRect(0, 0, screenWidth, screenHeight);
 
@@ -543,7 +542,7 @@ function dataLoaded(error, data) {
   }; // mark function
 
   // Handle screen resizes
-  resizeCanvas = event => {
+  resizeCanvas = () => {
     if (
       window.innerHeight < screenHeight &&
       window.innerHeight > screenHeight - 80
@@ -734,13 +733,13 @@ function setMargins() {
   }
 }
 
-function isInt(value) {
-  if (isNaN(value)) {
-    return false;
-  }
-  var x = parseFloat(value);
-  return (x | 0) === x;
-}
+// function isInt(value) {
+//   if (isNaN(value)) {
+//     return false;
+//   }
+//   var x = parseFloat(value);
+//   return (x | 0) === x;
+// }
 
 /**
  * detect IE
@@ -792,7 +791,7 @@ if (!Array.prototype.find) {
     value: function(predicate) {
       // 1. Let O be ? ToObject(this value).
       if (this == null) {
-        throw new TypeError('"this" is null or not defined');
+        throw new TypeError("this is null or not defined");
       }
 
       var o = Object(this);

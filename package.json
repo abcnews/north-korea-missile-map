@@ -12,7 +12,9 @@
     "start": "aunty serve"
   },
   "devDependencies": {
-    "@abcnews/aunty": "5.1.x"
+    "@abcnews/aunty": "5.1.x",
+    "eslint": "^4.8.0",
+    "eslint-plugin-react": "^7.4.0"
   },
   "dependencies": {
     "arrive": "^2.4.1",
