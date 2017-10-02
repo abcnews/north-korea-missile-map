@@ -18,10 +18,8 @@
 
   h1 {
     margin-bottom: 0;
-    font-family: -apple-system,
-      BlinkMacSystemFont, "Segoe UI",
-      Roboto, Helvetica, Arial,
-      sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif !important;
     font-size: 24px !important;
     font-weight: normal !important;
     line-height: normal !important;
@@ -33,7 +31,6 @@
   width: 240px;
   height: auto;
 }
-
 
 // A few global overrides to make things look nice
 :global {
@@ -51,7 +48,7 @@
     margin-bottom: 0;
   }
   // Space out content
-  .is-piecemeal>.Block-content {
+  .is-piecemeal > .Block-content {
     margin-top: 52vh;
     margin-bottom: 52vh;
   }

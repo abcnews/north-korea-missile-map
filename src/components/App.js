@@ -1,10 +1,8 @@
-const {h, Component} = require('preact');
-const styles = require('./App.scss');
-const worm = require('./worm.svg');
+const { h, Component } = require("preact");
+const styles = require("./App.scss");
+const worm = require("./worm.svg");
 
-const Globe = require('./Globe');
-
-
+const Globe = require("./Globe");
 
 class App extends Component {
   render() {

@@ -1,5 +1,5 @@
-const {h, Component} = require('preact');
-const styles = require('./ErrorBox.css');
+const { h, Component } = require("preact");
+const styles = require("./ErrorBox.css");
 
 class ErrorBox extends Component {
   componentDidMount() {
@@ -7,11 +7,7 @@ class ErrorBox extends Component {
   }
 
   render() {
-    return (
-      <pre className={styles.root}>
-        {this.props.error.stack}
-      </pre>
-    );
+    return <pre className={styles.root}>{this.props.error.stack}</pre>;
   }
 }
 
