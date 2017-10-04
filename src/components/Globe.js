@@ -31,6 +31,7 @@ let screenWidth = window.innerWidth,
 
 let tweening = 0; // Hack to avoid momentary multi-drawWorld
 
+// Detect if portrait or landscape for label positioning
 if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
 }
@@ -46,32 +47,39 @@ for (var i = 0; i < blockArray.length; i++) {
 blockArray[0].style.marginTop = screenHeight + "px";
 blockArray[blockArray.length - 1].style.marginBottom = screenHeight + "px";
 
+// On mobile we want smaller margins
 setMargins();
 
+// Where we are launching the missiles from
 let focusPoint = [],
   launchCountryCode = 408;
 
+// Setup where to inject our interactive code
 const placeholder = document.querySelector(
-  "[data-north-korea-missile-range-root]"
-);
-const geojsonUrl = placeholder.dataset.geojson;
-const storyDataUrl = placeholder.dataset.storydata;
+    "[data-north-korea-missile-range-root]"
+  ),
+  // Grab the data url from the HTML fragment
+  geojsonUrl = placeholder.dataset.geojson,
+  storyDataUrl = placeholder.dataset.storydata;
 
-// We are loading JSON data through d3-queue
+// We are loading JSON data through d3-queue then this function fires
 function dataLoaded(error, data) {
   if (error) throw error;
 
-  const worldMap = data[0],
-    storyData = data[1];
+  const worldMap = data[0], // TopoJSON representation of world geographies
+    storyData = data[1]; // JSON doc of longitudes and latitudes and place names
 
+  // Divide our data up into different GeoJSON objects
   const land = topojson.feature(worldMap, worldMap.objects.land),
     countries = topojson.feature(worldMap, worldMap.objects.countries).features,
     borders = topojson.mesh(worldMap, worldMap.objects.countries, function(
       a,
       b
     ) {
-      return a !== b;
+      return a !== b; // This makes sure not to return ocean borders
     }),
+    // A special object representing the whole D3-Geo area
+    // In this case (orthographic projection) it is a faux-sphere
     globe = { type: "Sphere" };
 
   // Set launch/focus point to the centre of North Korea
@@ -95,14 +103,16 @@ function dataLoaded(error, data) {
     .geoOrthographic()
     .translate([screenWidth / 2, screenHeight / 2])
     .clipAngle(90)
-    .precision(0.3)
+    .precision(0.6)
     .fitExtent(
       [[margins, margins], [screenWidth - margins, screenHeight - margins]],
       globe
     );
 
+  // Set initial global scale to handle zoom ins and outs
   initialGlobeScale = projection.scale();
 
+  // Set up the canvas stage background
   const base = select.select("#globe #map");
 
   const canvas = base
@@ -112,19 +122,23 @@ function dataLoaded(error, data) {
     .attr("width", screenWidth)
     .attr("height", screenHeight);
 
+  // Set up our canvas drawing context
   const context = canvas.node().getContext("2d");
+
+  // A non-d3 element selection
   const canvasEl = document.getElementById("globe-canvas");
 
-  // Pixel display and High DPI monitor scaling
+  // Auto-convert canvas to retina display and High DPI monitor scaling
   canvasDpiScaler(canvasEl, context);
 
-  // Build a path generator
+  // Build a path generator for our orthographic projection
   const path = d3
     .geoPath()
     .projection(projection)
     .context(context);
 
   // Render setup
+  // Let's look at North Korea
   const initialPoint = getItem("northkorea").longlat;
   projection.rotate([-initialPoint[0], -initialPoint[1]]);
 
@@ -142,18 +156,18 @@ function dataLoaded(error, data) {
   // Draw the inital state of the world
   drawWorld();
 
-  // Clear and render a frame of each part of the globe
+  // Function for clearing and render a frame of each part of the globe
   function drawWorld() {
     // Clear the canvas ready for redraw
     context.clearRect(0, 0, screenWidth, screenHeight);
 
-    // Draw the water
+    // Draw the oceans and the seas
     context.beginPath();
     context.fillStyle = "#E4EDF0";
     path(globe);
     context.fill();
 
-    // Draw landmass
+    // Draw all landmasses
     context.beginPath();
     context.strokeStyle = landStrokeColor;
     context.fillStyle = "white";
@@ -169,7 +183,7 @@ function dataLoaded(error, data) {
     path(borders);
     context.stroke();
 
-    // Draw launch country
+    // Draw our launch country
     context.beginPath();
     context.fillStyle = launchCountryColor;
     path(countries.find(item => item.id === launchCountryCode));
@@ -187,13 +201,15 @@ function dataLoaded(error, data) {
     context.stroke();
 
     // Draw a circle outline around the world
-    // First clear any radius
+    // First clear any radius around the outside
     context.beginPath();
     context.strokeStyle = abcBackgroundColor;
     context.lineWidth = 12;
     path(globe);
     context.stroke();
 
+    // Draw a petite circle a bit smaller radius
+    // We mess with the scale then put it back
     context.beginPath();
     context.strokeStyle = "#B6CED6";
     context.lineWidth = 2; // screenWidth < 700 ? 2 : 2;
@@ -202,11 +218,12 @@ function dataLoaded(error, data) {
     context.stroke();
     projection.scale(projection.scale() + 5);
 
-    // Please hide labels when on other side of the planet
+    // Label the places we want to point out
     if (currentLabels && currentLabels[0]) {
       drawLabels();
-    } // end if (currentLabel)
+    }
 
+    // Please hide labels when on other side of the planet
     function drawLabels() {
       currentLabels.forEach(function(element, i) {
         let geoAngle = d3.geoDistance(getItem(element).longlat, [
@@ -214,7 +231,7 @@ function dataLoaded(error, data) {
           -projection.rotate()[1]
         ]);
         if (geoAngle > 1.5707963267949) {
-          // Do nothing
+          // Do nothing because out of sight
         } else {
           // Draw a comparison label dot
           context.beginPath();
@@ -416,6 +433,7 @@ function dataLoaded(error, data) {
     if (event.detail.activated.config.label instanceof Array) {
       currentLabels = event.detail.activated.config.label;
     } else {
+      // Otherwise create an array with only one value
       currentLabels = [event.detail.activated.config.label];
     }
 
@@ -426,6 +444,8 @@ function dataLoaded(error, data) {
 
     globeScale = event.detail.activated.config.scale || 100;
 
+    // Controlled by 'ZOOM true' hash markers in CMS
+    // If two consecutive points have ZOOM true then zoom out first
     let shouldZoomOut = false;
     try {
       if (
@@ -438,6 +458,7 @@ function dataLoaded(error, data) {
       console.log(error);
     }
 
+    // Zoom in so that percentage set in marker relative to initial 100%
     let newGlobeScale = initialGlobeScale * (globeScale / 100);
 
     let currentRotation = projection.rotate();
@@ -542,6 +563,8 @@ function dataLoaded(error, data) {
 
   // Handle screen resizes
   resizeCanvas = () => {
+    // Dont resize if height resize is negligable
+    // To counteract mobile phone resize events when scroll direction changes
     if (
       window.innerHeight < screenHeight &&
       window.innerHeight > screenHeight - 80
@@ -574,7 +597,7 @@ function dataLoaded(error, data) {
     // Then zoom in to globe scale if necessary
     projection.scale(projection.scale() * globeScale / 100);
 
-    // Pixel display and High DPI monitor scaling
+    // Retina display and High DPI monitor scaling
     canvasDpiScaler(canvasEl, context);
 
     drawWorld();
@@ -702,7 +725,7 @@ class Globe extends Component {
       .awaitAll(dataLoaded);
   }
   componentWillUnmount() {
-    console.log("Component unmounting remove event listeners etc...");
+    console.log("Component unmounting. Removing event listeners etc...");
     document.removeEventListener("mark", mark);
     window.removeEventListener("resize", resizeCanvas);
   }
@@ -735,14 +758,6 @@ function setMargins() {
     margins = Math.floor(Math.min(screenWidth, screenHeight) * 0.15);
   }
 }
-
-// function isInt(value) {
-//   if (isNaN(value)) {
-//     return false;
-//   }
-//   var x = parseFloat(value);
-//   return (x | 0) === x;
-// }
 
 /**
  * detect IE
