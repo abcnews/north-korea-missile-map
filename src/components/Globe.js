@@ -233,7 +233,6 @@ function dataLoaded(error, data) {
           context.stroke();
 
           // Draw comparison label text
-
           let fontSize = screenWidth < 700 ? 16 : 18;
           let labelMargins = 18;
           let markerLongitude = projection(getItem(element).longlat)[0];
@@ -591,17 +590,20 @@ function dataLoaded(error, data) {
     canvas.on(
       "mousedown",
       function() {
-        blockArray = document.getElementsByClassName("Block-content");
-        for (var i = 0; i < blockArray.length; i++) {
-          blockArray[i].className += " " + styles.noPointer;
-        }
-
         if (select.event.which === 1) {
           dragStarted(this);
 
+          var mouseMoving = false; // Hack to fix freezing up on touch devices
           canvas.on(
             "mousemove",
             function() {
+              if (!mouseMoving) {
+                blockArray = document.getElementsByClassName("Block-content");
+                for (var i = 0; i < blockArray.length; i++) {
+                  blockArray[i].className += " " + styles.noPointer;
+                }
+                mouseMoving = true;
+              }
               dragged(this);
             },
             false
@@ -614,6 +616,7 @@ function dataLoaded(error, data) {
                 blockArray[i].classList.remove(styles.noPointer);
               }
               canvas.on("mousemove", null);
+              mouseMoving = false;
             },
             false
           );
