@@ -26,6 +26,7 @@ let screenWidth = window.innerWidth,
   pointRadius = 6,
   pointLineWidth = 2,
   radiusStrokeWidth = 3,
+  disableTrnasitions = false,
   transitionDuration = 1300,
   isLandscape = true;
 
@@ -468,37 +469,49 @@ function dataLoaded(error, data) {
     const dummyRotate = {},
       dummyZoom = {};
 
-    select
-      .select(dummyRotate)
-      .transition("rotateTransition")
-      .delay(0)
-      .duration(transitionDuration)
-      .tween("rotate", function() {
-        if (!currentLocationId) return;
-        var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
-        if (p) {
-          let rotationInterpolate = d3.interpolate(currentRotation, [
-            -p[0],
-            -p[1],
-            0
-          ]);
-          let radiusInterpolate = d3.interpolate(
-            kmsToRadius(previousRangeInKms),
-            kmsToRadius(currentRangeInKms)
-          );
+    if (disableTrnasitions) {
+      var p = getItem(currentLocationId).longlat;
+      // Instantly draw the next frame
+      projection.rotate([-p[0], -p[1], 0]);
+      rangeCircle.radius(kmsToRadius(currentRangeInKms));
+      projection.scale(newGlobeScale);
+      drawWorld();
+    } else {
+      rotateAndScaleRange();
+      // If #hash ZOOM true in CMS between two points then zoom out first
+      shouldZoomOut ? zoomOutFirst() : zoomDirect();
+    }
 
-          // Return the tween function
-          return function(time) {
-            tweening = time; // To detect if redrawing later
-            projection.rotate(rotationInterpolate(time));
-            rangeCircle.radius(radiusInterpolate(time));
-            drawWorld();
-          };
-        }
-      });
+    function rotateAndScaleRange() {
+      select
+        .select(dummyRotate)
+        .transition("rotateTransition")
+        .delay(0)
+        .duration(transitionDuration)
+        .tween("rotate", function() {
+          if (!currentLocationId) return;
+          var p = getItem(currentLocationId).longlat; // Make conditional in case of not found
+          if (p) {
+            let rotationInterpolate = d3.interpolate(currentRotation, [
+              -p[0],
+              -p[1],
+              0
+            ]);
+            let radiusInterpolate = d3.interpolate(
+              kmsToRadius(previousRangeInKms),
+              kmsToRadius(currentRangeInKms)
+            );
 
-    // If #hash ZOOM true in CMS between two points then zoom out first
-    shouldZoomOut ? zoomOutFirst() : zoomDirect();
+            // Return the tween function
+            return function(time) {
+              tweening = time; // To detect if redrawing later
+              projection.rotate(rotationInterpolate(time));
+              rangeCircle.radius(radiusInterpolate(time));
+              drawWorld();
+            };
+          }
+        });
+    } // end rotateAndScaleRange()
 
     function zoomDirect() {
       select
@@ -526,7 +539,7 @@ function dataLoaded(error, data) {
       select
         .select(dummyZoom)
         .transition()
-        .duration(transitionDuration / 2 + 300)
+        .duration(transitionDuration * 0.7)
         .tween("zoom", function() {
           if (!currentLocationId) return;
           var p = getItem(currentLocationId).longlat;
@@ -558,7 +571,7 @@ function dataLoaded(error, data) {
             };
           }
         });
-    }
+    } // end zoomOutFirst()
   }; // mark function
 
   // Handle screen resizes
