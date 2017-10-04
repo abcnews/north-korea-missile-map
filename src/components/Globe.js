@@ -539,7 +539,7 @@ function dataLoaded(error, data) {
       select
         .select(dummyZoom)
         .transition()
-        .duration(transitionDuration * 0.7)
+        .duration(transitionDuration / 2 + 300)
         .tween("zoom", function() {
           if (!currentLocationId) return;
           var p = getItem(currentLocationId).longlat;
