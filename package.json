@@ -30,6 +30,7 @@
     "d3-selection": "^1.1.0",
     "d3-svg-annotation": "^2.0.0",
     "d3-transition": "^1.1.0",
+    "jankdefer": "^1.0.0",
     "preact": "^8.2.5",
     "preact-compat": "^3.17.0",
     "topojson": "^3.0.0"

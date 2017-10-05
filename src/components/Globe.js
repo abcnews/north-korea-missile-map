@@ -2,6 +2,7 @@ const { h, Component } = require("preact");
 const topojson = require("topojson");
 const canvasDpiScaler = require("canvas-dpi-scaler");
 const select = require("d3-selection"); // For events to work
+const jankdefer = require("jankdefer");
 
 import d3 from "../d3-custom"; // Modularise D3
 const versor = require("../lib/versor"); // Canvas rotation library
@@ -155,7 +156,13 @@ function dataLoaded(error, data) {
   context.fillText("Preloading ABC Sans...", 100, 100);
 
   // Draw the inital state of the world
-  drawWorld();
+  // drawWorld();
+  jankdefer(drawWorld, {
+    framerateTarget: 50,
+    timeout: 5000,
+    threshold: 5,
+    debug: false,
+  });
 
   // Function for clearing and render a frame of each part of the globe
   function drawWorld() {
