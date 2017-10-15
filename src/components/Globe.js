@@ -2,7 +2,7 @@ const { h, Component } = require("preact");
 const topojson = require("topojson");
 const canvasDpiScaler = require("canvas-dpi-scaler");
 const select = require("d3-selection"); // For events to work
-const jankdefer = require("jankdefer");
+// const jankdefer = require("jankdefer");
 
 import d3 from "../d3-custom"; // Modularise D3
 const versor = require("../lib/versor"); // Canvas rotation library
@@ -156,13 +156,14 @@ function dataLoaded(error, data) {
   context.fillText("Preloading ABC Sans...", 100, 100);
 
   // Draw the inital state of the world
-  // drawWorld();
-  jankdefer(drawWorld, {
-    framerateTarget: 50,
-    timeout: 5000,
-    threshold: 5,
-    debug: false,
-  });
+  drawWorld();
+  // Probably don't need to defer jank but it can't hurt
+  // jankdefer(drawWorld, {
+  //   framerateTarget: 50,
+  //   timeout: 5000,
+  //   threshold: 5,
+  //   debug: false,
+  // });
 
   // Function for clearing and render a frame of each part of the globe
   function drawWorld() {
@@ -591,6 +592,7 @@ function dataLoaded(error, data) {
     ) {
       return;
     }
+
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
 
@@ -734,6 +736,9 @@ function dataLoaded(error, data) {
   // Add event listener for our marks
   document.addEventListener("mark", mark);
   window.addEventListener("resize", resizeCanvas);
+
+  // Add a window.onload to try counteracting scroll before load size bug
+  window.onload = function () { resizeCanvas() };
 }
 
 class Globe extends Component {
