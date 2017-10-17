@@ -2,7 +2,6 @@ const { h, Component } = require("preact");
 const topojson = require("topojson");
 const canvasDpiScaler = require("canvas-dpi-scaler");
 const select = require("d3-selection"); // For events to work
-// const jankdefer = require("jankdefer");
 
 import d3 from "../d3-custom"; // Modularise D3
 const versor = require("../lib/versor"); // Canvas rotation library
@@ -38,7 +37,7 @@ if (screenHeight > screenWidth) {
   isLandscape = !isLandscape;
 }
 
-// Override the vewheight vh margins to prevent jumping on mobile scroll changing directions
+// Override the viewheight vh margins to prevent jumping on mobile scroll changing directions
 let blockArray = document.getElementsByClassName("Block-content");
 
 for (var i = 0; i < blockArray.length; i++) {
@@ -157,13 +156,6 @@ function dataLoaded(error, data) {
 
   // Draw the inital state of the world
   drawWorld();
-  // Probably don't need to defer jank but it can't hurt
-  // jankdefer(drawWorld, {
-  //   framerateTarget: 50,
-  //   timeout: 5000,
-  //   threshold: 5,
-  //   debug: false,
-  // });
 
   // Function for clearing and render a frame of each part of the globe
   function drawWorld() {
@@ -738,7 +730,9 @@ function dataLoaded(error, data) {
   window.addEventListener("resize", resizeCanvas);
 
   // Add a window.onload to try counteracting scroll before load size bug
-  window.onload = function () { resizeCanvas() };
+  window.onload = function() {
+    resizeCanvas();
+  };
 }
 
 class Globe extends Component {
