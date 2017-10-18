@@ -25,9 +25,6 @@ if (stage) {
 }
 
 function init(ev) {
-  // console.log(ev.target); // the stage element
-  // console.log(ev.detail); // the `activated` and `deactivated` marks (if any)
-
   const App = require("./components/App");
   render(<App />, stage, stage.firstChild);
 }
@@ -35,7 +32,6 @@ function init(ev) {
 if (module.hot) {
   module.hot.accept("./components/App", () => {
     try {
-      // document.removeEventListener('mark', mark);
       init({
         target: stage,
         detail: stage.__SCROLLYTELLER__
