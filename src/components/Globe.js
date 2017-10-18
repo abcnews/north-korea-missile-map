@@ -21,8 +21,8 @@ let screenWidth = window.innerWidth,
   launchCountryColor = "#21849B",
   pointFill = "#FF6100",
   pointStroke = "white",
-  landStrokeColor = "rgba(29,60,67,0.5)",
-  landStrokeWidth = 1.1,
+  landStrokeColor = "rgba(29, 60, 67, 0.5)",
+  landStrokeWidth = 1.1, // Stroke > 1 to avoid Chrome line stitching
   pointRadius = 6,
   pointLineWidth = 2,
   radiusStrokeWidth = 3,
@@ -30,7 +30,7 @@ let screenWidth = window.innerWidth,
   transitionDuration = 1300,
   isLandscape = true;
 
-let tweening = 0; // Hack to avoid momentary multi-drawWorld
+let tweening = 0; // Hack to track rotate tween end and tween zoom
 
 // Detect if portrait or landscape for label positioning
 if (screenHeight > screenWidth) {
@@ -44,6 +44,7 @@ for (var i = 0; i < blockArray.length; i++) {
   blockArray[i].style.marginTop = screenHeight / 2 + 64 + "px";
   blockArray[i].style.marginBottom = screenHeight / 2 + 64 + "px";
 }
+
 // Top and bottom have full length margins
 blockArray[0].style.marginTop = screenHeight + "px";
 blockArray[blockArray.length - 1].style.marginBottom = screenHeight + "px";
@@ -53,7 +54,7 @@ setMargins();
 
 // Where we are launching the missiles from
 let focusPoint = [],
-  launchCountryCode = 408;
+  launchCountryCode = 408; // North Korea
 
 // Setup where to inject our interactive code
 const placeholder = document.querySelector(
@@ -101,11 +102,11 @@ function dataLoaded(error, data) {
 
   // Set up a D3 projection here
   const projection = d3
-    .geoOrthographic()
+    .geoOrthographic() // Globe projection
     .translate([screenWidth / 2, screenHeight / 2])
-    .clipAngle(90)
+    .clipAngle(90) // Only display front side of the world
     .precision(0.6)
-    .fitExtent(
+    .fitExtent( // Auto zoom
       [[margins, margins], [screenWidth - margins, screenHeight - margins]],
       globe
     );
@@ -126,10 +127,10 @@ function dataLoaded(error, data) {
   // Set up our canvas drawing context
   const context = canvas.node().getContext("2d");
 
-  // A non-d3 element selection
+  // A non-d3 element selection for Retina dn High DPI scaling
   const canvasEl = document.getElementById("globe-canvas");
 
-  // Auto-convert canvas to retina display and High DPI monitor scaling
+  // Auto-convert canvas to Retina display and High DPI monitor scaling
   canvasDpiScaler(canvasEl, context);
 
   // Build a path generator for our orthographic projection
@@ -148,9 +149,9 @@ function dataLoaded(error, data) {
     .center(focusPoint)
     .radius(kmsToRadius(currentRangeInKms));
 
-  // Try to preload ABC Sans
+  // Try to preload ABC Sans to avoid font flicker
   context.beginPath();
-  context.fillStyle = "rgba(0,0,0,0.0)";
+  context.fillStyle = "rgba(0, 0, 0, 0.0)";
   context.font = "700 18px ABCSans";
   context.fillText("Preloading ABC Sans...", 100, 100);
 
@@ -172,7 +173,7 @@ function dataLoaded(error, data) {
     context.beginPath();
     context.strokeStyle = landStrokeColor;
     context.fillStyle = "white";
-    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    context.lineWidth = landStrokeWidth;
     path(land);
     context.fill();
     context.stroke();
@@ -180,7 +181,7 @@ function dataLoaded(error, data) {
     // Draw outline of countries
     context.beginPath();
     context.strokeStyle = landStrokeColor;
-    context.lineWidth = landStrokeWidth; // screenWidth < 700 ? 0.5 : 1.1;
+    context.lineWidth = landStrokeWidth;
     path(borders);
     context.stroke();
 
@@ -195,7 +196,7 @@ function dataLoaded(error, data) {
     context.strokeStyle = "#FF6100";
     context.globalAlpha = 0.1;
     context.fillStyle = "#FF4D00";
-    context.lineWidth = radiusStrokeWidth; //screenWidth < 700 ? 2 : 3;
+    context.lineWidth = radiusStrokeWidth;
     path(rangeCircle());
     context.fill();
     context.globalAlpha = 1;
@@ -213,7 +214,7 @@ function dataLoaded(error, data) {
     // We mess with the scale then put it back
     context.beginPath();
     context.strokeStyle = "#B6CED6";
-    context.lineWidth = 2; // screenWidth < 700 ? 2 : 2;
+    context.lineWidth = 2;
     projection.scale(projection.scale() - 5);
     path(globe);
     context.stroke();
@@ -263,7 +264,7 @@ function dataLoaded(error, data) {
           context.font = `700 ${fontSize}px ABCSans`;
           context.textBaseline = "bottom";
 
-          let labelName = getItem(element).name; //.split("").join(String.fromCharCode(8202));
+          let labelName = getItem(element).name;
           let labelWidth = context.measureText(labelName).width;
 
           if (isLandscape) {
@@ -298,7 +299,8 @@ function dataLoaded(error, data) {
               context.fillText(
                 labelName,
                 markerLongitude + labelOffset + labelMargins,
-                markerLatitude + fontSize * 0.6 // Firefox doesn't do baseline properly so nudging the centre
+                // Firefox doesn't do baseline properly so nudging the centre
+                markerLatitude + fontSize * 0.6
               );
             } else {
               // Right aligned text pointers
@@ -469,6 +471,8 @@ function dataLoaded(error, data) {
     const dummyRotate = {},
       dummyZoom = {};
 
+    // Not currently implemented, but possible in future to
+    // disable transitions when framerate performance slow
     if (disableTrnasitions) {
       var p = getItem(currentLocationId).longlat;
       // Instantly draw the next frame
