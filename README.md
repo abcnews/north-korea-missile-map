@@ -7,7 +7,7 @@ A project generated from [aunty](http://github.com/abcnews/aunty)'s `preact-app`
 
 Depends on [Odyssey Scrollyteller](https://github.com/abcnews/odyssey-scrollyteller) and [ABC's Odyssey Template](https://github.com/abcnews/odyssey).
 
-The article is live now [on the ABC website](http://www.abc.net.au/news/2017-10-16/north-korea-missile-range-map/88808940).
+The article is live now [on the ABC website](http://www.abc.net.au/news/2017-10-16/north-korea-missile-range-map/8880894).
 
 ## Configuration
 
