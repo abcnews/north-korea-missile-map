@@ -14,7 +14,7 @@ import * as array from "d3-array";
 
 export default Object.assign(
   {},
-  // selection,
+  // selection, // Need to import separately for events to work
   geo,
   transition,
   interpolate,

@@ -52,7 +52,7 @@ blockArray[blockArray.length - 1].style.marginBottom = screenHeight + "px";
 // On mobile we want smaller margins
 setMargins();
 
-// Where we are launching the missiles from
+// Where the missiles are launching from
 let focusPoint = [],
   launchCountryCode = 408; // North Korea
 
