@@ -428,7 +428,7 @@ function dataLoaded(error, data) {
     } // end drawLabels function
   } // end drawWorld function
 
-  // This function will fire on ever hash mark
+  // This function will fire on every hash mark
   mark = event => {
     currentLocationId = event.detail.activated.config.id;
 
