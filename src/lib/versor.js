@@ -1,4 +1,5 @@
 // Version 0.0.0. Copyright 2017 Mike Bostock.
+// This is for click and drag functionality
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined"
     ? (module.exports = factory())
