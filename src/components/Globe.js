@@ -144,6 +144,7 @@ function dataLoaded(error, data) {
   const initialPoint = getItem("northkorea").longlat;
   projection.rotate([-initialPoint[0], -initialPoint[1]]);
 
+  // A circle that indicates missiles range
   const rangeCircle = d3
     .geoCircle()
     .center(focusPoint)
