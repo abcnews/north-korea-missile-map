@@ -1,6 +1,6 @@
 {
   "name": "north-korea-missile-ranges",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A project generated from aunty's react-app template.",
   "license": "MIT",
   "private": true,
@@ -25,7 +25,7 @@
     "react-test-renderer": "^16.4.0"
   },
   "dependencies": {
-    "@abcnews/react-globe": "^1.0.0",
+    "@abcnews/react-globe": "^1.0.2",
     "@abcnews/scrollyteller": "^1.0.4",
     "d3-request": "^1.0.6",
     "react": "^16.4.0",
