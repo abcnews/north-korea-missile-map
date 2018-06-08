@@ -1,11 +1,10 @@
-Missile Map
-===========
+# North Korea Missile Ranges
 
 Generate a [D3](http://d3js.org/) spinning globe on canvas and animate it using scrollyteller waypoints.
 
 A project generated from [aunty](http://github.com/abcnews/aunty)'s `preact-app` template.
 
-Depends on [Odyssey Scrollyteller](https://github.com/abcnews/odyssey-scrollyteller) and [ABC's Odyssey Template](https://github.com/abcnews/odyssey).
+Depends on [ABC's Odyssey Template](https://github.com/abcnews/odyssey).
 
 The article is live now [on the ABC website](http://www.abc.net.au/news/2017-10-16/north-korea-missile-range-map/8880894).
 
@@ -22,3 +21,4 @@ A standalone working model of the globe interactive can be found [on Glitch here
 ## Authors
 
 - Joshua Byrd ([phocks@gmail.com](mailto:phocks@gmail.com))
+- Nathan Hoad ([hoad.nathan@abc.net.au](mailto:hoad.nathan@abc.net.au))

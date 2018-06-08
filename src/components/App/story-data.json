@@ -1,5 +1,6 @@
 {
-  "locations": [{
+  "locations": [
+    {
       "id": "pyongyang",
       "name": "Pyongyang",
       "longlat": [125.7625, 39.0392]
@@ -52,7 +53,7 @@
     {
       "id": "siberia",
       "name": "Siberia",
-      "longlat": [99.196656, 61.013710]
+      "longlat": [99.196656, 61.01371]
     },
     {
       "id": "seasia",
@@ -82,7 +83,7 @@
     {
       "id": "auckland",
       "name": "Auckland",
-      "longlat": [174.763332, -36.848460]
+      "longlat": [174.763332, -36.84846]
     },
     {
       "id": "newyork",
@@ -113,12 +114,12 @@
     {
       "id": "sixthtest",
       "name": "6th test",
-      "longlat": [169.656855, 41.229800]
+      "longlat": [169.656855, 41.2298]
     },
     {
       "id": "seoul",
       "name": "Seoul",
-      "longlat": [126.992971, 37.550320]
+      "longlat": [126.992971, 37.55032]
     },
     {
       "id": "northkorea",

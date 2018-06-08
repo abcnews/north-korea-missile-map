@@ -1,53 +1,29 @@
-const { h, render } = require("preact");
-const Arrive = require("arrive");
+const React = require('react');
+const { render } = require('react-dom');
 
-let stage = document.querySelector(".scrollyteller-stage");
-//test
-if (stage) {
-  init({
-    target: stage,
-    detail: stage.__SCROLLYTELLER__
-  });
-} else {
-  // console.log('waiting for the stage');
+const PROJECT_NAME = 'north-korea-missile-ranges';
+const root = document.querySelector(`[data-${PROJECT_NAME}-root]`);
 
-  document.arrive(".scrollyteller-stage", function() {
-    // console.log('Stage has arrived...');
-    stage = document.querySelector(".scrollyteller-stage");
-    // console.log('Initialising interactive...');
-    init({
-      target: stage,
-      detail: stage.__SCROLLYTELLER__
-    });
-    // Unbind arrive listener
-    document.unbindArrive();
-  });
+const scrollyteller = require('@abcnews/scrollyteller').loadOdysseyScrollyteller('globe', 'u-full', 'mark');
+
+function init() {
+  const App = require('./components/App');
+  render(<App scrollyteller={scrollyteller} />, scrollyteller.mountNode);
 }
 
-function init(ev) {
-  const App = require("./components/App");
-  render(<App />, stage, stage.firstChild);
-}
+init();
 
 if (module.hot) {
-  module.hot.accept("./components/App", () => {
+  module.hot.accept('./components/App', () => {
     try {
-      init({
-        target: stage,
-        detail: stage.__SCROLLYTELLER__
-      });
+      init();
     } catch (err) {
-      const ErrorBox = require("./components/ErrorBox");
-
-      render(<ErrorBox error={err} />, stage, stage.firstChild);
+      const ErrorBox = require('./components/ErrorBox');
+      render(<ErrorBox error={err} />, root);
     }
   });
 }
 
-if (process.env.NODE_ENV === "development") {
-  require("preact/devtools");
-
-  console.debug(
-    `[north-korea-missile-map] public path: ${__webpack_public_path__}`
-  );
+if (process.env.NODE_ENV === 'development') {
+  console.debug(`[${PROJECT_NAME}] public path: ${__webpack_public_path__}`);
 }
