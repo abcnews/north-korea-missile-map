@@ -18,6 +18,8 @@ Note: this project is for use internally within the ABC. It will probably not wo
 
 A standalone working model of the globe interactive can be found [on Glitch here](https://glitch.com/~/nk).
 
+(Note: a lot of original code has now been extracted [into its own component](https://github.com/abcnews/react-globe).
+
 ## Authors
 
 - Joshua Byrd ([phocks@gmail.com](mailto:phocks@gmail.com))
