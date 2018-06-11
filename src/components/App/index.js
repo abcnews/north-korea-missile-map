@@ -2,7 +2,7 @@ const React = require("react");
 const styles = require("./styles.scss");
 
 const Scrollyteller = require("@abcnews/scrollyteller");
-const Globe = require("@abcnews/react-globe");
+const Globe = require("../../../lib/react-globe"); //"@abcnews/react-globe");
 
 const LOCATIONS = require("./story-data.json").locations;
 
