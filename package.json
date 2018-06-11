@@ -5,8 +5,13 @@
   "license": "MIT",
   "private": true,
   "contributors": [
+    "Joshua Byrd <phocks@gmail.com>",
     "Nathan Hoad <nathan@nathanhoad.net>"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abcnews/north-korea-missile-map"
+  },
   "aunty": "react-app",
   "scripts": {
     "start": "aunty serve",
