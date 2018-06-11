@@ -2,7 +2,7 @@
 
 Generate a [D3](http://d3js.org/) spinning globe on canvas and animate it using scrollyteller waypoints.
 
-A project generated from [aunty](http://github.com/abcnews/aunty)'s `preact-app` template.
+A project generated from [aunty](http://github.com/abcnews/aunty)'s `preact-app` template. Later re-built using `react-app`.
 
 Depends on [ABC's Odyssey Template](https://github.com/abcnews/odyssey).
 
