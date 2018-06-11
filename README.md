@@ -14,7 +14,7 @@ Generate marker waypoints in CoreMedia with hashes like `#markIDnorthkoreaRANGE1
 
 Needs a JSON data file with your coordinates and names etc.
 
-Note: this project is for use internally within the ABC. It will probably not work on its own, but you are welcome to have a look around (the most interesting code is in [/src/components/Globe.js](https://github.com/abcnews/north-korea-missile-map/blob/master/src/components/Globe.js))
+Note: this project is for use internally within the ABC. It will probably not work on its own, but you are welcome to have a look around.
 
 A standalone working model of the globe interactive can be found [on Glitch here](https://glitch.com/edit/#!/nk?path=script.js:1:0).
 
