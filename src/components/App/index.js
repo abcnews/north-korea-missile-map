@@ -1,10 +1,10 @@
-const React = require('react');
-const styles = require('./styles.scss');
+const React = require("react");
+const styles = require("./styles.scss");
 
-const Scrollyteller = require('@abcnews/scrollyteller');
-const Globe = require('@abcnews/react-globe');
+const Scrollyteller = require("@abcnews/scrollyteller");
+const Globe = require("@abcnews/react-globe");
 
-const LOCATIONS = require('./story-data.json').locations;
+const LOCATIONS = require("./story-data.json").locations;
 
 class App extends React.Component {
   constructor(props) {
@@ -25,7 +25,7 @@ class App extends React.Component {
   onMarker(marker) {
     let config = {
       scale: 100,
-      highlightedCountries: ['Korea, North']
+      highlightedCountries: ["Korea, North"]
     };
 
     let { id, range, scale, label } = marker;
@@ -34,20 +34,20 @@ class App extends React.Component {
       config.center = this.findLocation(id).longlat;
     }
 
-    if (typeof range !== 'undefined') {
+    if (typeof range !== "undefined") {
       config.ranges = [
         {
-          center: this.findLocation('northkorea').longlat,
+          center: this.findLocation("northkorea").longlat,
           radius: range
         }
       ];
     }
 
-    if (typeof scale !== 'undefined') {
+    if (typeof scale !== "undefined") {
       config.scale = scale;
     }
 
-    if (typeof label === 'string') label = [label];
+    if (typeof label === "string") label = [label];
     if (label instanceof Array) {
       config.labels = label.map(l => {
         const location = this.findLocation(l);
@@ -60,7 +60,7 @@ class App extends React.Component {
       });
     }
 
-    this.setState(state => ({ config }));
+    this.setState({ config });
   }
 
   render() {
@@ -72,7 +72,8 @@ class App extends React.Component {
           panels={scrollyteller.panels}
           className={`Block is-richtext is-piecemeal ${styles.scrollyteller}`}
           panelClassName={`Block-content u-layout u-richtext`}
-          onMarker={this.onMarker}>
+          onMarker={this.onMarker}
+        >
           <Globe background="#f9f9f9" config={this.state.config} />
         </Scrollyteller>
       </div>
