@@ -23,14 +23,14 @@
     }
   },
   "devDependencies": {
-    "@abcnews/aunty": "^8.0.0",
+    "@abcnews/aunty": "^8.0.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "jest": "^23.1.0",
     "react-test-renderer": "^16.4.0"
   },
   "dependencies": {
-    "@abcnews/react-globe": "^1.0.2",
+    "@abcnews/react-globe": "^1.0.5",
     "@abcnews/scrollyteller": "^1.0.4",
     "d3-request": "^1.0.6",
     "hoek": "^4.2.1",
