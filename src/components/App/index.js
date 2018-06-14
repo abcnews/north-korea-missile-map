@@ -25,7 +25,8 @@ class App extends React.Component {
   onMarker(marker) {
     let config = {
       scale: 100,
-      highlightedCountries: ['Korea, North']
+      highlightedCountries: ['Korea, North'],
+      duration: 1500
     };
 
     let { id, range, scale, label } = marker;

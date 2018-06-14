@@ -30,7 +30,7 @@
     "react-test-renderer": "^16.4.0"
   },
   "dependencies": {
-    "@abcnews/react-globe": "^1.0.5",
+    "@abcnews/react-globe": "^1.0.6",
     "@abcnews/scrollyteller": "^1.0.4",
     "d3-request": "^1.0.6",
     "hoek": "^4.2.1",
