@@ -27,7 +27,9 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
     "jest": "^23.1.0",
-    "react-test-renderer": "^16.4.0"
+    "react-test-renderer": "^16.4.0",
+    "url-parse": ">=1.4.3",
+    "cryptiles": ">=4.1.2"
   },
   "dependencies": {
     "@abcnews/react-globe": "^1.0.6",
