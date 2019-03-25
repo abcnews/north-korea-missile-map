@@ -23,20 +23,22 @@
     }
   },
   "devDependencies": {
-    "@abcnews/aunty": "^8.0.1",
+    "@abcnews/aunty": "^10.3.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
-    "jest": "^23.1.0",
+    "cryptiles": ">=4.1.2",
+    "extend": ">=3.0.2",
+    "jest": "^24.5.0",
     "react-test-renderer": "^16.4.0",
     "url-parse": ">=1.4.3",
-    "cryptiles": ">=4.1.2"
+    "webpack-dev-server": ">=3.1.11"
   },
   "dependencies": {
     "@abcnews/react-globe": "^1.0.6",
     "@abcnews/scrollyteller": "^1.0.4",
     "d3-request": "^1.0.6",
     "hoek": "^4.2.1",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0"
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
   }
 }
