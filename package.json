@@ -31,7 +31,8 @@
     "jest": "^24.5.0",
     "react-test-renderer": "^16.4.0",
     "url-parse": ">=1.4.3",
-    "webpack-dev-server": ">=3.1.11"
+    "webpack-dev-server": ">=3.1.11",
+    "tunnel-agent": ">=0.6.0"
   },
   "dependencies": {
     "@abcnews/react-globe": "^1.0.6",
