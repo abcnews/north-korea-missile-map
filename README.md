@@ -10,7 +10,7 @@ The article is live now [on the ABC website](http://www.abc.net.au/news/2017-10-
 
 ## Configuration
 
-Generate marker waypoints in CoreMedia with hashes like `#markIDnorthkoreaRANGE1000LABELguam`
+Generate marker waypoints in CoreMedia with hashes like `#markIDnorthkoreaRANGE1000SCALE400LABELosakaLABELseoul` 
 
 Needs a JSON data file with your coordinates and names etc.
 
