@@ -1,1 +1,51 @@
-.base {}
+@mixin for-size($range) {
+  $phone-upper-boundary: 600px;
+  $tablet-portrait-upper-boundary: 900px;
+  $tablet-landscape-upper-boundary: 1200px;
+  $desktop-upper-boundary: 1800px;
+
+  @if $range == phone-only {
+    @media (max-width: #{$phone-upper-boundary - 1}) {
+      @content;
+    }
+  } @else if $range == tablet-portrait-up {
+    @media (min-width: $phone-upper-boundary) {
+      @content;
+    }
+  } @else if $range == tablet-landscape-up {
+    @media (min-width: $tablet-portrait-upper-boundary) {
+      @content;
+    }
+  } @else if $range == desktop-up {
+    @media (min-width: $tablet-landscape-upper-boundary) {
+      @content;
+    }
+  } @else if $range == big-desktop-up {
+    @media (min-width: $desktop-upper-boundary) {
+      @content;
+    }
+  }
+}
+
+.panel {
+  p {
+    color: #111 !important;
+    font-size: 18px !important;
+
+    @include for-size(tablet-portrait-up) {
+      font-size: 20px !important;
+    }
+
+    @include for-size(desktop-up) {
+      font-size: 22px !important;
+    }
+  }
+}
+
+div.panel::before {
+  background-color: hsl(0deg 100% 100% / 90%);
+
+  @include for-size(phone-only) {
+    width: calc(100% - 2rem);
+  }
+}
