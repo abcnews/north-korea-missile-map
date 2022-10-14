@@ -1,7 +1,8 @@
 const React = require('react');
-const styles = require('./styles.scss');
+const styles = require('./styles.scss').default;
 
-const Scrollyteller = require('@abcnews/scrollyteller');
+
+const Scrollyteller = require('@abcnews/scrollyteller').default;
 const Globe = require('@abcnews/react-globe');
 
 const LOCATIONS = require('./story-data.json').locations;
@@ -65,6 +66,7 @@ class App extends React.Component {
   }
 
   render() {
+    
     const { scrollyteller } = this.props;
 
     return (
@@ -72,7 +74,7 @@ class App extends React.Component {
         <Scrollyteller
           panels={scrollyteller.panels}
           className={`Block is-richtext is-piecemeal ${styles.scrollyteller}`}
-          panelClassName={`Block-content u-layout u-richtext`}
+          panelClassName={`Block-content u-layout ${styles.panel}`}
           onMarker={this.onMarker}>
           <Globe background="#f9f9f9" config={this.state.config} />
         </Scrollyteller>
